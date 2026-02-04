@@ -5,9 +5,10 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { INVESTOR_TYPES, PIPELINE_STAGES, PITCH_ANGLES } from '../lib/constants';
 import { calculateEngagementScore, getOutreachUrgency, generateRecommendations, suggestPitchAngle, getAIPrioritizedInvestors } from '../lib/engine';
 import { buildInitialInvestors } from '../data/investors';
+import { supabase, fetchInvestors, bulkUpsertInvestors } from '../lib/supabase';
 
 // ═══════════════════════════════════════════════════════════════
-// STORAGE — uses localStorage for persistence in browser
+// STORAGE — uses localStorage + Supabase for persistence
 // ═══════════════════════════════════════════════════════════════
 
 const STORAGE_KEY = 'birdai-fundraising-v3';
@@ -838,18 +839,100 @@ export default function Home() {
     setSyncing(false);
   };
 
-  // Load
+  const [cloudSyncing, setCloudSyncing] = useState(false);
+  const [cloudStatus, setCloudStatus] = useState(null); // 'synced', 'syncing', 'error'
+
+  // Sync to cloud
+  const syncToCloud = async () => {
+    if (!supabase || cloudSyncing) return;
+    setCloudSyncing(true);
+    setCloudStatus('syncing');
+    try {
+      await bulkUpsertInvestors(investors);
+      setCloudStatus('synced');
+      localStorage.setItem('birdai-last-cloud-sync', new Date().toISOString());
+    } catch (err) {
+      console.error('Cloud sync error:', err);
+      setCloudStatus('error');
+    }
+    setCloudSyncing(false);
+  };
+
+  // Load from cloud
+  const loadFromCloud = async () => {
+    if (!supabase) return null;
+    setCloudSyncing(true);
+    setCloudStatus('syncing');
+    try {
+      const cloudData = await fetchInvestors();
+      if (cloudData && cloudData.length > 0) {
+        setInvestors(cloudData);
+        saveInvestors(cloudData);
+        setCloudStatus('synced');
+        setCloudSyncing(false);
+        return cloudData;
+      }
+    } catch (err) {
+      console.error('Cloud load error:', err);
+      setCloudStatus('error');
+    }
+    setCloudSyncing(false);
+    return null;
+  };
+
+  // Load - try cloud first, then localStorage
   useEffect(() => {
-    const stored = loadInvestors();
-    setInvestors(stored || buildInitialInvestors());
-    setLoaded(true);
+    const initLoad = async () => {
+      // First try localStorage for immediate load
+      const stored = loadInvestors();
+      setInvestors(stored || buildInitialInvestors());
+      setLoaded(true);
+
+      // Then try cloud if available
+      if (supabase) {
+        try {
+          const cloudData = await fetchInvestors();
+          if (cloudData && cloudData.length > 0) {
+            // Cloud has data - use it (it's the source of truth)
+            setInvestors(cloudData);
+            saveInvestors(cloudData);
+            setCloudStatus('synced');
+          } else if (stored && stored.length > 0) {
+            // Cloud is empty but local has data - sync local to cloud
+            await bulkUpsertInvestors(stored);
+            setCloudStatus('synced');
+          }
+        } catch (err) {
+          console.error('Initial cloud sync error:', err);
+          setCloudStatus('error');
+        }
+      }
+    };
+    initLoad();
   }, []);
 
-  // Save on change
+  // Save on change - to localStorage immediately, debounced to cloud
   useEffect(() => {
     if (loaded && investors.length > 0) {
+      // Save to localStorage immediately
       const t = setTimeout(() => saveInvestors(investors), 500);
-      return () => clearTimeout(t);
+      
+      // Debounced save to cloud
+      const cloudT = setTimeout(async () => {
+        if (supabase) {
+          try {
+            await bulkUpsertInvestors(investors);
+            setCloudStatus('synced');
+          } catch (err) {
+            console.error('Auto cloud sync error:', err);
+          }
+        }
+      }, 2000); // Wait 2 seconds of inactivity before syncing to cloud
+      
+      return () => {
+        clearTimeout(t);
+        clearTimeout(cloudT);
+      };
     }
   }, [investors, loaded]);
 
@@ -931,6 +1014,33 @@ export default function Home() {
             </button>
           )}
           <button style={S.btn('primary')} onClick={() => setShowAdd(true)}>+ Add Investor</button>
+          
+          {/* Cloud Sync Status */}
+          {supabase && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '6px 12px', background: cloudStatus === 'synced' ? '#10B98120' : cloudStatus === 'error' ? '#EF444420' : '#3B82F620', borderRadius: '8px', border: `1px solid ${cloudStatus === 'synced' ? '#10B981' : cloudStatus === 'error' ? '#EF4444' : '#3B82F6'}40` }}>
+              <span style={{ fontSize: '12px' }}>
+                {cloudSyncing ? '🔄' : cloudStatus === 'synced' ? '☁️ ✓' : cloudStatus === 'error' ? '☁️ ✗' : '☁️'}
+              </span>
+              <span style={{ fontSize: '11px', color: cloudStatus === 'synced' ? '#10B981' : cloudStatus === 'error' ? '#EF4444' : '#3B82F6' }}>
+                {cloudSyncing ? 'Syncing...' : cloudStatus === 'synced' ? 'Cloud Synced' : cloudStatus === 'error' ? 'Sync Error' : 'Cloud'}
+              </span>
+              <button
+                onClick={syncToCloud}
+                disabled={cloudSyncing}
+                style={{ ...S.btn(), fontSize: '10px', padding: '4px 8px', background: 'transparent', color: '#A0AEC0' }}
+              >
+                ↑ Push
+              </button>
+              <button
+                onClick={loadFromCloud}
+                disabled={cloudSyncing}
+                style={{ ...S.btn(), fontSize: '10px', padding: '4px 8px', background: 'transparent', color: '#A0AEC0' }}
+              >
+                ↓ Pull
+              </button>
+            </div>
+          )}
+          
           <button 
             style={{ ...S.btn(), fontSize: '11px', padding: '8px 12px' }} 
             onClick={() => {
