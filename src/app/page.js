@@ -331,18 +331,45 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
           <div style={{ fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>{investor.name}</div>
           {investor.company && investor.company !== investor.name && <div style={{ fontSize: '14px', color: '#A0AEC0', marginTop: '4px' }}>{investor.company}</div>}
           {form.email ? (
-            <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '6px' }}>📧 {form.email}</div>
-          ) : (
-            <div style={{ marginTop: '10px', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              📧 {form.email}
               <button 
-                onClick={findContact} 
-                disabled={researching}
-                style={{ ...S.btn('primary'), fontSize: '12px', padding: '6px 12px', opacity: researching ? 0.6 : 1 }}
+                onClick={() => { setForm(p => ({ ...p, email: '' })); setEditing(true); }}
+                style={{ fontSize: '10px', color: '#64748B', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
               >
-                {researching ? '🔍 Searching...' : '🔍 Find Contact'}
+                change
               </button>
-              <button onClick={openLinkedInSearch} style={{ ...S.btn(), fontSize: '12px', padding: '6px 10px' }}>LinkedIn</button>
-              <button onClick={openGoogleSearch} style={{ ...S.btn(), fontSize: '12px', padding: '6px 10px' }}>Google</button>
+            </div>
+          ) : (
+            <div style={{ marginTop: '10px' }}>
+              <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+                <input 
+                  type="email"
+                  placeholder="Add email manually..."
+                  value={form.email || ''}
+                  onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                  onKeyDown={e => { if (e.key === 'Enter' && form.email) save(); }}
+                  style={{ ...S.input, flex: 1, fontSize: '12px', padding: '8px 10px' }}
+                />
+                <button 
+                  onClick={save}
+                  disabled={!form.email}
+                  style={{ ...S.btn('primary'), fontSize: '12px', padding: '6px 12px', opacity: form.email ? 1 : 0.5 }}
+                >
+                  Save
+                </button>
+              </div>
+              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                <button 
+                  onClick={findContact} 
+                  disabled={researching}
+                  style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px', opacity: researching ? 0.6 : 1, background: '#1D4ED820', border: '1px solid #1D4ED8' }}
+                >
+                  {researching ? '🔍 Searching...' : '🔍 Apollo'}
+                </button>
+                <button onClick={openLinkedInSearch} style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px' }}>LinkedIn</button>
+                <button onClick={openGoogleSearch} style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px' }}>Google</button>
+              </div>
             </div>
           )}
         </div>
