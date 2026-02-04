@@ -99,6 +99,120 @@ export function getOutreachUrgency(investor) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// AI PRIORITIZATION ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+export function getAIPrioritizedInvestors(investors) {
+  const now = Date.now();
+  
+  // Score each investor with AI-like reasoning
+  const scored = investors
+    .filter(i => !['committed', 'passed'].includes(i.stage))
+    .map(inv => {
+      let score = 0;
+      const reasons = [];
+      
+      // 1. Stage momentum (closer to close = higher priority)
+      const stageWeight = {
+        'term-sheet': 50, 'in-diligence': 40, 'meeting-scheduled': 35,
+        'contacted': 25, 'outreach-ready': 20, 'researching': 10, 'identified': 5
+      };
+      score += stageWeight[inv.stage] || 0;
+      if (inv.stage === 'term-sheet') reasons.push('🔥 Term sheet stage - close this!');
+      if (inv.stage === 'in-diligence') reasons.push('📋 In diligence - keep momentum');
+      if (inv.stage === 'meeting-scheduled') reasons.push('📅 Meeting scheduled - prepare');
+      
+      // 2. Investor type fit for crypto/Web3
+      const typeFit = {
+        'crypto-vc': 25, 'inception-fund': 22, 'exchange-vc': 20,
+        'angel': 18, 'corporate-vc': 15, 'fund-of-funds': 12,
+        'family-office': 10, 'institutional': 8, 'tradfi': 5
+      };
+      score += typeFit[inv.type] || 0;
+      if (['crypto-vc', 'inception-fund', 'exchange-vc'].includes(inv.type)) {
+        reasons.push('🎯 Strong crypto/Web3 thesis fit');
+      }
+      
+      // 3. Timing urgency
+      if (inv.lastContact) {
+        const daysSince = (now - new Date(inv.lastContact).getTime()) / (1000 * 60 * 60 * 24);
+        if (daysSince > 21 && inv.stage !== 'identified') {
+          score += 20;
+          reasons.push(`⚠️ ${Math.round(daysSince)} days cold - re-engage now`);
+        } else if (daysSince > 14) {
+          score += 15;
+          reasons.push(`⏰ ${Math.round(daysSince)} days - follow up soon`);
+        } else if (daysSince < 3) {
+          score += 10;
+          reasons.push('✅ Recently engaged - maintain momentum');
+        }
+      } else if (inv.stage === 'outreach-ready') {
+        score += 18;
+        reasons.push('🚀 Ready for first outreach');
+      }
+      
+      // 4. Priority boost
+      if (inv.priority === 'high') {
+        score += 20;
+        reasons.push('⭐ High priority target');
+      } else if (inv.priority === 'medium') {
+        score += 8;
+      }
+      
+      // 5. Has email = actionable
+      if (inv.email) {
+        score += 10;
+        reasons.push('📧 Email available - can reach out');
+      } else {
+        reasons.push('🔍 Need to find contact info');
+      }
+      
+      // 6. Existing commitment/relationship
+      if (inv.commitment > 0) {
+        score += 15;
+        reasons.push(`💰 Already committed $${(inv.commitment/1000).toFixed(0)}K`);
+      }
+      
+      // 7. Activity signals interest
+      if (inv.activities && inv.activities.length > 2) {
+        score += 10;
+        reasons.push('💬 Active conversation history');
+      }
+      
+      // Generate action recommendation
+      let action = '';
+      if (!inv.email) {
+        action = 'Find contact → Use Apollo or LinkedIn';
+      } else if (inv.stage === 'identified' || inv.stage === 'researching') {
+        action = 'Research their portfolio → Craft personalized intro';
+      } else if (inv.stage === 'outreach-ready') {
+        action = 'Send intro email using pitch playbook';
+      } else if (inv.stage === 'contacted' && inv.lastContact) {
+        const days = Math.round((now - new Date(inv.lastContact).getTime()) / (1000 * 60 * 60 * 24));
+        action = days > 7 ? 'Send follow-up email' : 'Wait for response';
+      } else if (inv.stage === 'meeting-scheduled') {
+        action = 'Prepare deck & talking points';
+      } else if (inv.stage === 'in-diligence') {
+        action = 'Respond to DD questions promptly';
+      } else if (inv.stage === 'term-sheet') {
+        action = 'Review terms & close!';
+      } else {
+        action = 'Review and update status';
+      }
+      
+      return {
+        ...inv,
+        aiScore: Math.round(score),
+        aiReasons: reasons.slice(0, 3), // Top 3 reasons
+        aiAction: action,
+      };
+    })
+    .sort((a, b) => b.aiScore - a.aiScore);
+  
+  return scored.slice(0, 10); // Top 10 recommendations
+}
+
+// ═══════════════════════════════════════════════════════════════
 // OUTREACH RECOMMENDATIONS ENGINE
 // ═══════════════════════════════════════════════════════════════
 

@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useSession, signIn, signOut } from 'next-auth/react';
 import { INVESTOR_TYPES, PIPELINE_STAGES, PITCH_ANGLES } from '../lib/constants';
-import { calculateEngagementScore, getOutreachUrgency, generateRecommendations, suggestPitchAngle } from '../lib/engine';
+import { calculateEngagementScore, getOutreachUrgency, generateRecommendations, suggestPitchAngle, getAIPrioritizedInvestors } from '../lib/engine';
 import { buildInitialInvestors } from '../data/investors';
 
 // ═══════════════════════════════════════════════════════════════
@@ -146,6 +146,83 @@ function Dashboard({ investors, setView, setSelectedId }) {
               </div>
             );
           })}
+        </div>
+      </div>
+
+      {/* AI Recommendations */}
+      <div style={{ ...S.card, marginTop: '16px', background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)', border: '1px solid #3B82F650' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '24px' }}>🤖</span>
+            <div>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#3B82F6' }}>AI Agent Recommendations</div>
+              <div style={{ fontSize: '11px', color: '#64748B' }}>Top 10 investors to prioritize today</div>
+            </div>
+          </div>
+          <div style={{ fontSize: '10px', color: '#10B981', background: '#10B98120', padding: '4px 10px', borderRadius: '12px' }}>
+            Updated just now
+          </div>
+        </div>
+        
+        <div style={{ display: 'grid', gap: '8px' }}>
+          {getAIPrioritizedInvestors(investors).map((inv, idx) => (
+            <div 
+              key={inv.id}
+              onClick={() => { setSelectedId(inv.id); setView('pipeline'); }}
+              style={{ 
+                display: 'grid', 
+                gridTemplateColumns: '32px 1fr auto',
+                gap: '12px',
+                padding: '12px',
+                background: idx === 0 ? '#3B82F615' : '#ffffff05',
+                borderRadius: '8px',
+                cursor: 'pointer',
+                border: idx === 0 ? '1px solid #3B82F640' : '1px solid transparent',
+                transition: 'all 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#3B82F620'; e.currentTarget.style.borderColor = '#3B82F6'; }}
+              onMouseLeave={e => { e.currentTarget.style.background = idx === 0 ? '#3B82F615' : '#ffffff05'; e.currentTarget.style.borderColor = idx === 0 ? '#3B82F640' : 'transparent'; }}
+            >
+              <div style={{ 
+                width: '32px', 
+                height: '32px', 
+                borderRadius: '50%', 
+                background: idx === 0 ? '#3B82F6' : idx < 3 ? '#10B981' : '#64748B',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '13px',
+                fontWeight: '700',
+                color: '#FFF',
+              }}>
+                {idx + 1}
+              </div>
+              
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#FFFFFF' }}>{inv.name}</div>
+                <div style={{ fontSize: '12px', color: '#A0AEC0' }}>{inv.company || INVESTOR_TYPES[inv.type]?.label}</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', marginTop: '6px' }}>
+                  {inv.aiReasons.map((reason, i) => (
+                    <span key={i} style={{ fontSize: '10px', color: '#94A3B8', background: '#1E293B', padding: '2px 8px', borderRadius: '4px' }}>
+                      {reason}
+                    </span>
+                  ))}
+                </div>
+              </div>
+              
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ 
+                  fontSize: '18px', 
+                  fontWeight: '800', 
+                  color: inv.aiScore >= 60 ? '#10B981' : inv.aiScore >= 40 ? '#F59E0B' : '#64748B',
+                }}>
+                  {inv.aiScore}
+                </div>
+                <div style={{ fontSize: '9px', color: '#64748B', marginTop: '2px' }}>AI SCORE</div>
+                <div style={{ fontSize: '11px', color: '#3B82F6', marginTop: '8px', maxWidth: '140px' }}>{inv.aiAction}</div>
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>
