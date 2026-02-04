@@ -374,7 +374,20 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
             </div>
           )}
         </div>
-        <button onClick={onClose} style={{ ...S.btn(), padding: '6px 10px', fontSize: '16px' }}>✕</button>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <button 
+            onClick={() => {
+              if (confirm(`Delete ${investor.name}? This cannot be undone.`)) {
+                setInvestors(prev => prev.filter(i => i.id !== investor.id));
+                onClose();
+              }
+            }} 
+            style={{ ...S.btn(), padding: '6px 10px', fontSize: '12px', background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440' }}
+          >
+            🗑️ Delete
+          </button>
+          <button onClick={onClose} style={{ ...S.btn(), padding: '6px 10px', fontSize: '16px' }}>✕</button>
+        </div>
       </div>
 
       {/* Research Results */}
