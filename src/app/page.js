@@ -342,35 +342,36 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
               </button>
             </div>
           ) : (
-            <div style={{ marginTop: '10px', background: '#1E293B40', padding: '12px', borderRadius: '8px', border: '1px dashed #3B82F6' }}>
-              <div style={{ fontSize: '11px', color: '#3B82F6', marginBottom: '8px', fontWeight: '600' }}>📧 ADD EMAIL</div>
-              <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
+            <div style={{ marginTop: '16px', background: '#1E293B30', padding: '16px', borderRadius: '10px', border: '1px dashed #3B82F650' }}>
+              <div style={{ fontSize: '12px', color: '#3B82F6', marginBottom: '12px', fontWeight: '600' }}>📧 ADD EMAIL</div>
+              <div style={{ display: 'flex', gap: '10px', marginBottom: '12px' }}>
                 <input 
                   type="email"
                   placeholder="name@company.com"
                   value={form.email || ''}
                   onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
                   onKeyDown={e => { if (e.key === 'Enter' && form.email && form.email.includes('@')) save(); }}
-                  style={{ ...S.input, flex: 1, fontSize: '13px', padding: '10px 12px', background: '#0A0A0F' }}
+                  style={{ ...S.input, flex: 1, fontSize: '14px', padding: '12px 14px', background: '#0A0A0F' }}
                 />
                 <button 
                   onClick={save}
                   disabled={!form.email || !form.email.includes('@')}
-                  style={{ ...S.btn('primary'), fontSize: '13px', padding: '8px 16px', opacity: form.email && form.email.includes('@') ? 1 : 0.5 }}
+                  style={{ ...S.btn('primary'), fontSize: '14px', padding: '10px 20px', opacity: form.email && form.email.includes('@') ? 1 : 0.5 }}
                 >
                   Save
                 </button>
               </div>
-              <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ fontSize: '11px', color: '#64748B', marginBottom: '8px' }}>Or search online:</div>
+              <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
                 <button 
                   onClick={findContact} 
                   disabled={researching}
-                  style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px', opacity: researching ? 0.6 : 1, background: '#1D4ED820', border: '1px solid #1D4ED8' }}
+                  style={{ ...S.btn(), fontSize: '12px', padding: '8px 14px', opacity: researching ? 0.6 : 1, background: '#1D4ED820', border: '1px solid #1D4ED8' }}
                 >
                   {researching ? '🔍 Searching...' : '🔍 Apollo'}
                 </button>
-                <button onClick={openLinkedInSearch} style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px' }}>LinkedIn</button>
-                <button onClick={openGoogleSearch} style={{ ...S.btn(), fontSize: '11px', padding: '5px 10px' }}>Google</button>
+                <button onClick={openLinkedInSearch} style={{ ...S.btn(), fontSize: '12px', padding: '8px 14px' }}>LinkedIn</button>
+                <button onClick={openGoogleSearch} style={{ ...S.btn(), fontSize: '12px', padding: '8px 14px' }}>Google</button>
               </div>
             </div>
           )}
