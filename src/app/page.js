@@ -112,7 +112,13 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
             const maxCount = Math.max(...Object.values(byStage), 1);
             const barHeight = Math.max(16, (count / maxCount) * 100);
             return (
-              <div key={key} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end' }}>
+              <div 
+                key={key} 
+                onClick={() => { setFilters(prev => ({ ...prev, stage: key, search: '' })); setView('pipeline'); }}
+                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end', cursor: 'pointer', transition: 'transform 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+              >
                 <span style={{ fontSize: '16px', fontWeight: '700', color: stage.color }}>{count}</span>
                 <div style={{ width: '100%', height: `${barHeight}px`, background: stage.color + '30', borderRadius: '6px 6px 0 0', border: `2px solid ${stage.color}50` }} />
                 <span style={{ fontSize: '12px', color: '#A0AEC0', textAlign: 'center', lineHeight: '1.4', minHeight: '32px' }}>{stage.label}</span>
@@ -152,7 +158,13 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
           {Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([type, count]) => {
             const cfg = INVESTOR_TYPES[type] || INVESTOR_TYPES.other;
             return (
-              <div key={type} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 0' }}>
+              <div 
+                key={type} 
+                onClick={() => { setFilters(prev => ({ ...prev, type: type, stage: 'all', search: '' })); setView('pipeline'); }}
+                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 4px', marginLeft: '-4px', marginRight: '-4px', cursor: 'pointer', borderRadius: '6px', transition: 'background 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+              >
                 <span style={{ fontSize: '14px', color: '#E2E8F0' }}>{cfg.icon} {cfg.label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: `${Math.min(140, (count / investors.length) * 300)}px`, height: '6px', background: cfg.color, borderRadius: '3px' }} />
