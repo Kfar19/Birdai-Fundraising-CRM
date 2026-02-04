@@ -342,20 +342,21 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
               </button>
             </div>
           ) : (
-            <div style={{ marginTop: '10px' }}>
+            <div style={{ marginTop: '10px', background: '#1E293B40', padding: '12px', borderRadius: '8px', border: '1px dashed #3B82F6' }}>
+              <div style={{ fontSize: '11px', color: '#3B82F6', marginBottom: '8px', fontWeight: '600' }}>📧 ADD EMAIL</div>
               <div style={{ display: 'flex', gap: '6px', marginBottom: '8px' }}>
                 <input 
                   type="email"
-                  placeholder="Add email manually..."
+                  placeholder="name@company.com"
                   value={form.email || ''}
                   onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
-                  onKeyDown={e => { if (e.key === 'Enter' && form.email) save(); }}
-                  style={{ ...S.input, flex: 1, fontSize: '12px', padding: '8px 10px' }}
+                  onKeyDown={e => { if (e.key === 'Enter' && form.email && form.email.includes('@')) save(); }}
+                  style={{ ...S.input, flex: 1, fontSize: '13px', padding: '10px 12px', background: '#0A0A0F' }}
                 />
                 <button 
                   onClick={save}
-                  disabled={!form.email}
-                  style={{ ...S.btn('primary'), fontSize: '12px', padding: '6px 12px', opacity: form.email ? 1 : 0.5 }}
+                  disabled={!form.email || !form.email.includes('@')}
+                  style={{ ...S.btn('primary'), fontSize: '13px', padding: '8px 16px', opacity: form.email && form.email.includes('@') ? 1 : 0.5 }}
                 >
                   Save
                 </button>
