@@ -130,3 +130,28 @@ export async function deleteInvestor(id) {
   return true;
 }
 
+// Subscribe to real-time changes
+export function subscribeToChanges(callback) {
+  if (!supabase) return null;
+  
+  const channel = supabase
+    .channel('investors-changes')
+    .on('postgres_changes', 
+      { event: '*', schema: 'public', table: 'investors' },
+      (payload) => {
+        console.log('Real-time update:', payload);
+        callback(payload);
+      }
+    )
+    .subscribe();
+  
+  return channel;
+}
+
+// Unsubscribe from real-time changes
+export function unsubscribeFromChanges(channel) {
+  if (channel) {
+    supabase.removeChannel(channel);
+  }
+}
+

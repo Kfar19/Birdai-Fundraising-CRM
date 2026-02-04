@@ -5,7 +5,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { INVESTOR_TYPES, PIPELINE_STAGES, PITCH_ANGLES } from '../lib/constants';
 import { calculateEngagementScore, getOutreachUrgency, generateRecommendations, suggestPitchAngle, getAIPrioritizedInvestors } from '../lib/engine';
 import { buildInitialInvestors } from '../data/investors';
-import { supabase, fetchInvestors, bulkUpsertInvestors } from '../lib/supabase';
+import { supabase, fetchInvestors, bulkUpsertInvestors, subscribeToChanges, unsubscribeFromChanges, fromDbFormat } from '../lib/supabase';
 
 // ═══════════════════════════════════════════════════════════════
 // STORAGE — uses localStorage + Supabase for persistence
@@ -880,8 +880,10 @@ export default function Home() {
     return null;
   };
 
-  // Load - try cloud first, then localStorage
+  // Load - try cloud first, then localStorage + real-time sync
   useEffect(() => {
+    let channel = null;
+    
     const initLoad = async () => {
       // First try localStorage for immediate load
       const stored = loadInvestors();
@@ -906,9 +908,32 @@ export default function Home() {
           console.error('Initial cloud sync error:', err);
           setCloudStatus('error');
         }
+        
+        // Subscribe to real-time changes
+        channel = subscribeToChanges((payload) => {
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            const updated = fromDbFormat(payload.new);
+            setInvestors(prev => {
+              const exists = prev.find(i => i.id === updated.id);
+              if (exists) {
+                return prev.map(i => i.id === updated.id ? updated : i);
+              } else {
+                return [...prev, updated];
+              }
+            });
+          } else if (payload.eventType === 'DELETE') {
+            setInvestors(prev => prev.filter(i => i.id !== payload.old.id));
+          }
+          setCloudStatus('synced');
+        });
       }
     };
     initLoad();
+    
+    // Cleanup subscription on unmount
+    return () => {
+      if (channel) unsubscribeFromChanges(channel);
+    };
   }, []);
 
   // Save on change - to localStorage immediately, debounced to cloud
