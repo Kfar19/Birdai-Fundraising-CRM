@@ -52,7 +52,7 @@ const S = {
 // DASHBOARD
 // ═══════════════════════════════════════════════════════════════
 
-function Dashboard({ investors, setView, setSelectedId }) {
+function Dashboard({ investors, setView, setSelectedId, setFilters }) {
   const committed = investors.filter(i => i.stage === 'committed');
   const totalCommitted = committed.reduce((sum, i) => sum + (i.commitment || 0), 0);
   const active = investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage));
@@ -68,12 +68,26 @@ function Dashboard({ investors, setView, setSelectedId }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
-          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC' },
-          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6 },
-          { label: 'ACTIVE PIPELINE', value: active.length, sub: 'in progress', color: '#3B82F6' },
-          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444' },
+          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC', filter: { stage: 'all' } },
+          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6, filter: { stage: 'committed' } },
+          { label: 'ACTIVE PIPELINE', value: active.length, sub: 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all' }, activeOnly: true },
+          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', filter: { priority: 'high', stage: 'all' }, urgentOnly: true },
         ].map((kpi, idx) => (
-          <div key={idx} style={S.card}>
+          <div 
+            key={idx} 
+            onClick={() => {
+              setFilters(prev => ({ ...prev, ...kpi.filter, search: '' }));
+              setView('pipeline');
+            }}
+            style={{ 
+              ...S.card, 
+              cursor: 'pointer', 
+              transition: 'all 0.15s',
+              border: '1px solid transparent',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = kpi.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
+          >
             <div style={{ fontSize: '13px', color: kpi.color === '#F8FAFC' ? '#A0AEC0' : kpi.color, fontWeight: '700', letterSpacing: '0.5px', marginBottom: '10px' }}>{kpi.label}</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
               <span style={{ fontSize: '36px', fontWeight: '800', color: kpi.color }}>{kpi.value}</span>
@@ -84,6 +98,7 @@ function Dashboard({ investors, setView, setSelectedId }) {
                 <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: `${Math.min(100, kpi.bar * 100)}%` }} />
               </div>
             )}
+            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '8px' }}>Click to view →</div>
           </div>
         ))}
       </div>
@@ -868,7 +883,7 @@ export default function Home() {
       </header>
 
       <main style={{ padding: '24px', overflowY: 'auto', height: 'calc(100vh - 65px)' }}>
-        {view === 'dashboard' && <Dashboard investors={investors} setView={setView} setSelectedId={setSelectedId} />}
+        {view === 'dashboard' && <Dashboard investors={investors} setView={setView} setSelectedId={setSelectedId} setFilters={setFilters} />}
         {view === 'pipeline' && <PipelineView investors={investors} setInvestors={setInvestors} selectedId={selectedId} setSelectedId={setSelectedId} filters={filters} setFilters={setFilters} />}
         {view === 'outreach' && <OutreachView investors={investors} />}
         {view === 'playbook' && <PlaybookView investors={investors} />}
