@@ -585,14 +585,14 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
 // OUTREACH INTELLIGENCE
 // ═══════════════════════════════════════════════════════════════
 
-function OutreachView({ investors }) {
+function OutreachView({ investors, setView, setSelectedId }) {
   const recs = useMemo(() => generateRecommendations(investors), [investors]);
   return (
     <div>
       <div style={{ ...S.card, background: 'linear-gradient(135deg, #111318, #1A1A2E)', border: '1px solid rgba(59,130,246,0.25)' }}>
         <div style={S.cardTitle}>🧠 Outreach Intelligence Engine</div>
         <div style={{ fontSize: '12px', color: '#94A3B8', lineHeight: '1.6' }}>
-          Prioritized outreach recommendations based on {investors.length} contacts. Considers investor type, engagement score, recency, and pitch angle matching.
+          Prioritized outreach recommendations based on {investors.length} contacts. <strong style={{ color: '#3B82F6' }}>Click any investor to edit their profile.</strong>
         </div>
       </div>
       {recs.map((rec, idx) => (
@@ -603,11 +603,25 @@ function OutreachView({ investors }) {
             <thead><tr><th style={S.th}>Investor</th><th style={S.th}>Type</th><th style={S.th}>Pitch</th><th style={S.th}>Action</th></tr></thead>
             <tbody>
               {rec.investors.map(i => (
-                <tr key={i.id}>
-                  <td style={S.td}><div style={{ fontWeight: '600', color: '#F8FAFC' }}>{i.name}</div>{i.company && i.company !== i.name && <div style={{ fontSize: '10px', color: '#64748B' }}>{i.company}</div>}</td>
+                <tr 
+                  key={i.id}
+                  onClick={() => { setSelectedId(i.id); setView('pipeline'); }}
+                  style={{ cursor: 'pointer', transition: 'background 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                >
+                  <td style={S.td}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <span style={{ color: '#3B82F6' }}>→</span>
+                      <div>
+                        <div style={{ fontWeight: '600', color: '#F8FAFC' }}>{i.name}</div>
+                        {i.company && i.company !== i.name && <div style={{ fontSize: '10px', color: '#64748B' }}>{i.company}</div>}
+                      </div>
+                    </div>
+                  </td>
                   <td style={S.td}><span style={S.badge((INVESTOR_TYPES[i.type] || INVESTOR_TYPES.other).color)}>{(INVESTOR_TYPES[i.type] || INVESTOR_TYPES.other).label}</span></td>
                   <td style={S.td}><span style={{ fontSize: '11px', color: '#CBD5E1' }}>{PITCH_ANGLES[i.pitchAngle]?.label || '—'}</span></td>
-                  <td style={S.td}><span style={{ fontSize: '10px', color: '#94A3B8' }}>{i.nextAction || '—'}</span></td>
+                  <td style={S.td}><span style={{ fontSize: '10px', color: '#F59E0B' }}>{i.nextAction || 'Edit profile →'}</span></td>
                 </tr>
               ))}
             </tbody>
@@ -897,7 +911,7 @@ export default function Home() {
       <main style={{ padding: '24px', overflowY: 'auto', height: 'calc(100vh - 65px)' }}>
         {view === 'dashboard' && <Dashboard investors={investors} setView={setView} setSelectedId={setSelectedId} setFilters={setFilters} />}
         {view === 'pipeline' && <PipelineView investors={investors} setInvestors={setInvestors} selectedId={selectedId} setSelectedId={setSelectedId} filters={filters} setFilters={setFilters} />}
-        {view === 'outreach' && <OutreachView investors={investors} />}
+        {view === 'outreach' && <OutreachView investors={investors} setView={setView} setSelectedId={setSelectedId} />}
         {view === 'playbook' && <PlaybookView investors={investors} />}
       </main>
 
