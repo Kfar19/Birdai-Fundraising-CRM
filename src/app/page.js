@@ -931,7 +931,55 @@ export default function Home() {
             </button>
           )}
           <button style={S.btn('primary')} onClick={() => setShowAdd(true)}>+ Add Investor</button>
-          <button style={{ ...S.btn(), fontSize: '13px', padding: '10px 16px' }} onClick={() => { if (confirm('Reset all data?')) { setInvestors(buildInitialInvestors()); localStorage.removeItem(STORAGE_KEY); } }}>Reset</button>
+          <button 
+            style={{ ...S.btn(), fontSize: '11px', padding: '8px 12px' }} 
+            onClick={() => {
+              const data = JSON.stringify(investors, null, 2);
+              const blob = new Blob([data], { type: 'application/json' });
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement('a');
+              a.href = url;
+              a.download = `birdai-investors-${new Date().toISOString().split('T')[0]}.json`;
+              a.click();
+            }}
+          >
+            📤 Export
+          </button>
+          <button 
+            style={{ ...S.btn(), fontSize: '11px', padding: '8px 12px' }} 
+            onClick={() => {
+              const input = document.createElement('input');
+              input.type = 'file';
+              input.accept = '.json';
+              input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                  const reader = new FileReader();
+                  reader.onload = (ev) => {
+                    try {
+                      const imported = JSON.parse(ev.target.result);
+                      if (Array.isArray(imported) && imported.length > 0) {
+                        if (confirm(`Import ${imported.length} investors? This will replace your current data.`)) {
+                          setInvestors(imported);
+                          localStorage.setItem(STORAGE_KEY, JSON.stringify(imported));
+                          alert(`✅ Imported ${imported.length} investors!`);
+                        }
+                      } else {
+                        alert('Invalid file format');
+                      }
+                    } catch (err) {
+                      alert('Error parsing file: ' + err.message);
+                    }
+                  };
+                  reader.readAsText(file);
+                }
+              };
+              input.click();
+            }}
+          >
+            📥 Import
+          </button>
+          <button style={{ ...S.btn(), fontSize: '11px', padding: '8px 12px' }} onClick={() => { if (confirm('Reset all data?')) { setInvestors(buildInitialInvestors()); localStorage.removeItem(STORAGE_KEY); } }}>Reset</button>
         </div>
       </header>
 
