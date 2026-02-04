@@ -614,9 +614,36 @@ export default function Home() {
   const [loaded, setLoaded] = useState(false);
   const [syncing, setSyncing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
+  const [autoSyncEnabled, setAutoSyncEnabled] = useState(true);
 
-  // Gmail sync function
-  const syncGmail = async () => {
+  // Auto Gmail sync - runs every hour
+  useEffect(() => {
+    if (!session?.accessToken || !autoSyncEnabled || !loaded) return;
+    
+    // Check if we should sync (last sync > 1 hour ago or never synced)
+    const lastSyncTime = localStorage.getItem('birdai-last-gmail-sync');
+    const oneHour = 60 * 60 * 1000;
+    const shouldSync = !lastSyncTime || (Date.now() - parseInt(lastSyncTime)) > oneHour;
+    
+    if (shouldSync) {
+      console.log('🔄 Auto-syncing Gmail...');
+      syncGmail(true); // silent mode
+    }
+    
+    // Set up interval to check every 5 minutes if sync is needed
+    const interval = setInterval(() => {
+      const last = localStorage.getItem('birdai-last-gmail-sync');
+      if (!last || (Date.now() - parseInt(last)) > oneHour) {
+        console.log('🔄 Auto-syncing Gmail (hourly)...');
+        syncGmail(true);
+      }
+    }, 5 * 60 * 1000); // Check every 5 minutes
+    
+    return () => clearInterval(interval);
+  }, [session, autoSyncEnabled, loaded]);
+
+  // Gmail sync function (silent = no alerts, for auto-sync)
+  const syncGmail = async (silent = false) => {
     if (!session?.accessToken) return;
     setSyncing(true);
     try {
@@ -626,6 +653,9 @@ export default function Home() {
         body: JSON.stringify({ accessToken: session.accessToken, investors }),
       });
       const data = await res.json();
+      
+      // Save sync time
+      localStorage.setItem('birdai-last-gmail-sync', Date.now().toString());
       
       if (data.success && data.matches?.length > 0) {
         // Update investors with email matches
@@ -643,13 +673,22 @@ export default function Home() {
           return inv;
         }));
         setLastSync({ time: new Date().toISOString(), matches: data.matches.length, scanned: data.scanned });
-        alert(`✅ Gmail synced! Found ${data.matches.length} matches from ${data.scanned} sent emails.`);
+        if (!silent) {
+          alert(`✅ Gmail synced! Found ${data.matches.length} matches from ${data.scanned} sent emails.`);
+        } else {
+          console.log(`✅ Auto-sync: Found ${data.matches.length} matches from ${data.scanned} emails`);
+        }
       } else {
-        alert(data.message || 'No new matches found in your sent emails.');
+        setLastSync({ time: new Date().toISOString(), matches: 0, scanned: data.scanned || 0 });
+        if (!silent) {
+          alert(data.message || 'No new matches found in your sent emails.');
+        }
       }
     } catch (err) {
       console.error('Gmail sync error:', err);
-      alert('Error syncing Gmail. Check console for details.');
+      if (!silent) {
+        alert('Error syncing Gmail. Check console for details.');
+      }
     }
     setSyncing(false);
   };
@@ -704,16 +743,38 @@ export default function Home() {
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           {/* Gmail Integration */}
           {session ? (
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <button 
-                style={{ ...S.btn(), background: syncing ? '#374151' : '#1D4ED8', color: '#FFF', fontSize: '12px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px' }} 
-                onClick={syncGmail} 
-                disabled={syncing}
-              >
-                {syncing ? '🔄 Syncing...' : '📧 Sync Gmail'}
-              </button>
-              <span style={{ fontSize: '10px', color: '#64748B' }}>{session.user?.email?.split('@')[0]}</span>
-              <button style={{ fontSize: '10px', color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer' }} onClick={() => signOut()}>×</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <button 
+                  style={{ ...S.btn(), background: syncing ? '#374151' : '#1D4ED8', color: '#FFF', fontSize: '12px', padding: '8px 14px', display: 'flex', alignItems: 'center', gap: '6px' }} 
+                  onClick={() => syncGmail(false)} 
+                  disabled={syncing}
+                >
+                  {syncing ? '🔄 Syncing...' : '📧 Sync Now'}
+                </button>
+                <button
+                  onClick={() => setAutoSyncEnabled(!autoSyncEnabled)}
+                  style={{ 
+                    padding: '6px 10px', 
+                    fontSize: '10px', 
+                    background: autoSyncEnabled ? '#10B98130' : '#37415150', 
+                    color: autoSyncEnabled ? '#10B981' : '#64748B',
+                    border: `1px solid ${autoSyncEnabled ? '#10B981' : '#374151'}`,
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    fontFamily: 'inherit',
+                    fontWeight: '600',
+                  }}
+                  title={autoSyncEnabled ? 'Auto-sync is ON (every hour)' : 'Auto-sync is OFF'}
+                >
+                  {autoSyncEnabled ? '⚡ AUTO' : '⏸ AUTO'}
+                </button>
+              </div>
+              <div style={{ fontSize: '9px', color: '#64748B', textAlign: 'right', lineHeight: '1.3' }}>
+                <div>{session.user?.email?.split('@')[0]}</div>
+                {lastSync && <div style={{ color: '#10B981' }}>Last: {new Date(lastSync.time).toLocaleTimeString()}</div>}
+              </div>
+              <button style={{ fontSize: '12px', color: '#94A3B8', background: 'none', border: 'none', cursor: 'pointer', padding: '4px' }} onClick={() => signOut()}>✕</button>
             </div>
           ) : (
             <button 
