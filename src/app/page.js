@@ -1227,14 +1227,34 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
                   <td style={S.td}><span style={S.badge(tc.color)}>{tc.icon} {tc.label}</span></td>
                   <td style={S.td}>
                     <select 
-                      value={i.stage}
+                      value={
+                        i.stage === 'committed' ? 'committed' :
+                        i.stage === 'passed' ? 'passed' :
+                        i.stage === 'identified' ? 'identified' :
+                        'active'
+                      }
                       onClick={(e) => e.stopPropagation()}
                       onChange={(e) => {
-                        const newStage = e.target.value;
-                        const autoHighPriority = ['committed', 'term-sheet', 'in-diligence'].includes(newStage);
+                        const selection = e.target.value;
+                        let newStage = i.stage;
+                        let newPriority = i.priority;
+                        
+                        if (selection === 'committed') {
+                          newStage = 'committed';
+                          newPriority = 'high';
+                        } else if (selection === 'active') {
+                          newStage = 'in-contact';
+                          newPriority = 'high';
+                        } else if (selection === 'identified') {
+                          newStage = 'identified';
+                        } else if (selection === 'passed') {
+                          newStage = 'passed';
+                          newPriority = 'low';
+                        }
+                        
                         setInvestors(prev => prev.map(inv => 
                           inv.id === i.id 
-                            ? { ...inv, stage: newStage, priority: autoHighPriority ? 'high' : inv.priority }
+                            ? { ...inv, stage: newStage, priority: newPriority }
                             : inv
                         ));
                       }}
@@ -1250,9 +1270,10 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
                         outline: 'none'
                       }}
                     >
-                      {Object.entries(PIPELINE_STAGES).map(([key, stage]) => (
-                        <option key={key} value={key} style={{ background: '#0C0C12', color: '#E8EAF0' }}>{stage.label}</option>
-                      ))}
+                      <option value="identified" style={{ background: '#0C0C12', color: '#64748B' }}>📋 Identified</option>
+                      <option value="active" style={{ background: '#0C0C12', color: '#3B82F6' }}>🎯 Active Pipeline</option>
+                      <option value="committed" style={{ background: '#0C0C12', color: '#10B981' }}>✅ Committed</option>
+                      <option value="passed" style={{ background: '#0C0C12', color: '#6B7280' }}>⏸️ Passed</option>
                     </select>
                   </td>
                   <td style={S.td}><span style={{ color: i.priority === 'high' ? '#EF4444' : i.priority === 'medium' ? '#F59E0B' : '#64748B', fontWeight: '700', fontSize: '11px' }}>{i.priority === 'high' ? '●' : '○'} {(i.priority || '').toUpperCase()}</span></td>
