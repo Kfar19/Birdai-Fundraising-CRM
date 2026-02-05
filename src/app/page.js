@@ -331,11 +331,11 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
         <div>
           <div style={{ fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>{investor.name}</div>
           {investor.company && investor.company !== investor.name && <div style={{ fontSize: '14px', color: '#A0AEC0', marginTop: '4px' }}>{investor.company}</div>}
-          {form.email ? (
+          {investor.email && !editing ? (
             <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-              📧 {form.email}
+              📧 {investor.email}
               <button 
-                onClick={() => { setForm(p => ({ ...p, email: '' })); setEditing(true); }}
+                onClick={() => { setEditing(true); }}
                 style={{ fontSize: '10px', color: '#64748B', background: 'none', border: 'none', cursor: 'pointer', textDecoration: 'underline' }}
               >
                 change
