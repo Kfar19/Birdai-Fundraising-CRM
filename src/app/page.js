@@ -685,11 +685,14 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
 // ═══════════════════════════════════════════════════════════════
 
 function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filters, setFilters }) {
+  const [viewMode, setViewMode] = useState('table'); // 'table' or 'kanban'
+  const [draggedInvestor, setDraggedInvestor] = useState(null);
+  
   const filtered = useMemo(() => {
     let r = [...investors];
     if (filters.search) { const q = filters.search.toLowerCase(); r = r.filter(i => [i.name, i.company, i.email, i.notes].some(f => (f || '').toLowerCase().includes(q))); }
     if (filters.type !== 'all') r = r.filter(i => i.type === filters.type);
-    if (filters.stage !== 'all') r = r.filter(i => i.stage === filters.stage);
+    if (viewMode === 'table' && filters.stage !== 'all') r = r.filter(i => i.stage === filters.stage);
     if (filters.priority !== 'all') r = r.filter(i => i.priority === filters.priority);
     if (filters.source !== 'all') r = r.filter(i => i.source === filters.source);
     r.sort((a, b) => {
@@ -699,23 +702,68 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
       return (a.name || '').localeCompare(b.name || '');
     });
     return r;
-  }, [investors, filters]);
+  }, [investors, filters, viewMode]);
 
   const selected = selectedId ? investors.find(i => i.id === selectedId) : null;
+  
+  // Drag and drop handlers
+  const handleDragStart = (e, investor) => {
+    setDraggedInvestor(investor);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+  
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+  };
+  
+  const handleDrop = (e, newStage) => {
+    e.preventDefault();
+    if (draggedInvestor && draggedInvestor.stage !== newStage) {
+      // Auto-set priority to high for committed/term-sheet/in-diligence
+      const autoHighPriority = ['committed', 'term-sheet', 'in-diligence'].includes(newStage);
+      setInvestors(prev => prev.map(i => 
+        i.id === draggedInvestor.id 
+          ? { ...i, stage: newStage, priority: autoHighPriority ? 'high' : i.priority }
+          : i
+      ));
+    }
+    setDraggedInvestor(null);
+  };
+
+  // Kanban columns
+  const kanbanStages = Object.entries(PIPELINE_STAGES).filter(([k]) => !['passed'].includes(k));
 
   return (
     <div style={{ display: 'flex', gap: '16px', height: '100%' }}>
-      <div style={{ flex: 1, overflowY: 'auto' }}>
+      <div style={{ flex: 1, overflowY: 'auto', overflowX: viewMode === 'kanban' ? 'auto' : 'hidden' }}>
         <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
-          <input style={{ ...S.input, width: '240px' }} placeholder="Search name, company, notes..." value={filters.search} onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} />
+          {/* View Mode Toggle */}
+          <div style={{ display: 'flex', gap: '2px', background: '#1E293B', borderRadius: '8px', padding: '2px' }}>
+            <button 
+              onClick={() => setViewMode('table')} 
+              style={{ ...S.btn(), fontSize: '11px', padding: '6px 12px', background: viewMode === 'table' ? '#3B82F6' : 'transparent', color: viewMode === 'table' ? '#FFF' : '#64748B' }}
+            >
+              📋 Table
+            </button>
+            <button 
+              onClick={() => setViewMode('kanban')} 
+              style={{ ...S.btn(), fontSize: '11px', padding: '6px 12px', background: viewMode === 'kanban' ? '#3B82F6' : 'transparent', color: viewMode === 'kanban' ? '#FFF' : '#64748B' }}
+            >
+              📊 Kanban
+            </button>
+          </div>
+          <input style={{ ...S.input, width: '200px' }} placeholder="Search..." value={filters.search} onChange={e => setFilters(f => ({ ...f, search: e.target.value }))} />
           <select style={S.select} value={filters.type} onChange={e => setFilters(f => ({ ...f, type: e.target.value }))}>
             <option value="all">All Types</option>
             {Object.entries(INVESTOR_TYPES).map(([k, v]) => <option key={k} value={k}>{v.icon} {v.label}</option>)}
           </select>
-          <select style={S.select} value={filters.stage} onChange={e => setFilters(f => ({ ...f, stage: e.target.value }))}>
-            <option value="all">All Stages</option>
-            {Object.entries(PIPELINE_STAGES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
-          </select>
+          {viewMode === 'table' && (
+            <select style={S.select} value={filters.stage} onChange={e => setFilters(f => ({ ...f, stage: e.target.value }))}>
+              <option value="all">All Stages</option>
+              {Object.entries(PIPELINE_STAGES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          )}
           <select style={S.select} value={filters.priority} onChange={e => setFilters(f => ({ ...f, priority: e.target.value }))}>
             <option value="all">All Priority</option>
             <option value="high">🔴 High</option>
@@ -732,15 +780,99 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             <option value="web3-vc-list">Web3 VCs</option>
             <option value="manual">Manual</option>
           </select>
-          <select style={S.select} value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
-            <option value="name">Sort: Name</option>
-            <option value="engagement">Sort: Engagement</option>
-            <option value="commitment">Sort: Commitment</option>
-            <option value="stage">Sort: Stage</option>
-          </select>
+          {viewMode === 'table' && (
+            <select style={S.select} value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
+              <option value="name">Sort: Name</option>
+              <option value="engagement">Sort: Engagement</option>
+              <option value="commitment">Sort: Commitment</option>
+              <option value="stage">Sort: Stage</option>
+            </select>
+          )}
           <span style={{ fontSize: '11px', color: '#64748B' }}>{filtered.length} results</span>
         </div>
 
+        {/* KANBAN VIEW */}
+        {viewMode === 'kanban' && (
+          <div style={{ display: 'flex', gap: '12px', minWidth: 'max-content', paddingBottom: '16px' }}>
+            {kanbanStages.map(([stageKey, stage]) => {
+              const stageInvestors = filtered.filter(i => i.stage === stageKey);
+              return (
+                <div 
+                  key={stageKey}
+                  onDragOver={handleDragOver}
+                  onDrop={(e) => handleDrop(e, stageKey)}
+                  style={{ 
+                    width: '220px', 
+                    minHeight: '400px',
+                    background: draggedInvestor ? '#1E293B30' : '#0F1117',
+                    borderRadius: '10px',
+                    border: `2px solid ${draggedInvestor ? stage.color + '60' : '#1E293B'}`,
+                    transition: 'border-color 0.2s, background 0.2s'
+                  }}
+                >
+                  {/* Column Header */}
+                  <div style={{ padding: '12px', borderBottom: `2px solid ${stage.color}40`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <span style={{ fontSize: '12px', fontWeight: '700', color: stage.color }}>{stage.label}</span>
+                    <span style={{ fontSize: '11px', color: '#64748B', background: '#1E293B', padding: '2px 8px', borderRadius: '10px' }}>{stageInvestors.length}</span>
+                  </div>
+                  
+                  {/* Cards */}
+                  <div style={{ padding: '8px', display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '500px', overflowY: 'auto' }}>
+                    {stageInvestors.slice(0, 20).map(inv => (
+                      <div
+                        key={inv.id}
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, inv)}
+                        onClick={() => setSelectedId(inv.id)}
+                        style={{
+                          padding: '10px',
+                          background: selectedId === inv.id ? '#3B82F620' : '#111318',
+                          border: `1px solid ${selectedId === inv.id ? '#3B82F6' : '#1E293B'}`,
+                          borderRadius: '8px',
+                          cursor: 'grab',
+                          transition: 'transform 0.1s, box-shadow 0.1s',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.02)'; e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.3)'; }}
+                        onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.boxShadow = 'none'; }}
+                      >
+                        <div style={{ fontSize: '12px', fontWeight: '600', color: '#F8FAFC', marginBottom: '4px' }}>{inv.name}</div>
+                        {inv.company && inv.company !== inv.name && (
+                          <div style={{ fontSize: '10px', color: '#64748B', marginBottom: '6px' }}>{inv.company}</div>
+                        )}
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                          <span style={{ 
+                            fontSize: '9px', 
+                            padding: '2px 6px', 
+                            borderRadius: '4px',
+                            background: (INVESTOR_TYPES[inv.type] || INVESTOR_TYPES.other).color + '20',
+                            color: (INVESTOR_TYPES[inv.type] || INVESTOR_TYPES.other).color 
+                          }}>
+                            {(INVESTOR_TYPES[inv.type] || INVESTOR_TYPES.other).icon}
+                          </span>
+                          {inv.priority === 'high' && <span style={{ fontSize: '10px', color: '#EF4444' }}>●</span>}
+                          {inv.email && <span style={{ fontSize: '10px' }}>📧</span>}
+                        </div>
+                      </div>
+                    ))}
+                    {stageInvestors.length > 20 && (
+                      <div style={{ fontSize: '10px', color: '#64748B', textAlign: 'center', padding: '8px' }}>
+                        +{stageInvestors.length - 20} more
+                      </div>
+                    )}
+                    {stageInvestors.length === 0 && (
+                      <div style={{ fontSize: '11px', color: '#475569', textAlign: 'center', padding: '20px', fontStyle: 'italic' }}>
+                        Drop here
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        {/* TABLE VIEW */}
+        {viewMode === 'table' && (
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -775,7 +907,8 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             })}
           </tbody>
         </table>
-        {filtered.length > 150 && <div style={{ padding: '12px', textAlign: 'center', color: '#64748B', fontSize: '11px' }}>Showing 150 of {filtered.length} — use filters to narrow</div>}
+        )}
+        {viewMode === 'table' && filtered.length > 150 && <div style={{ padding: '12px', textAlign: 'center', color: '#64748B', fontSize: '11px' }}>Showing 150 of {filtered.length} — use filters to narrow</div>}
       </div>
       {selected && <InvestorDetail investor={selected} setInvestors={setInvestors} onClose={() => setSelectedId(null)} />}
     </div>
