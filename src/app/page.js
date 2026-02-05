@@ -140,6 +140,55 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
   const byType = {};
   for (const i of investors) byType[i.type] = (byType[i.type] || 0) + 1;
 
+  // Calculate yesterday's activity
+  const now = new Date();
+  const yesterday = new Date(now);
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+  const endOfYesterday = new Date(yesterday);
+  endOfYesterday.setHours(23, 59, 59, 999);
+  
+  const yesterdayActivity = useMemo(() => {
+    const activities = [];
+    let emailsLogged = 0;
+    let callsLogged = 0;
+    let meetingsLogged = 0;
+    let notesAdded = 0;
+    
+    investors.forEach(inv => {
+      if (inv.activities && inv.activities.length > 0) {
+        inv.activities.forEach(act => {
+          const actDate = new Date(act.date);
+          if (actDate >= yesterday && actDate <= endOfYesterday) {
+            activities.push({ ...act, investorName: inv.name, investorId: inv.id });
+            if (act.type === 'email') emailsLogged++;
+            if (act.type === 'call') callsLogged++;
+            if (act.type === 'meeting') meetingsLogged++;
+            if (act.type === 'note') notesAdded++;
+          }
+        });
+      }
+      // Check if lastContact was yesterday
+      if (inv.lastContact) {
+        const lastContactDate = new Date(inv.lastContact);
+        if (lastContactDate >= yesterday && lastContactDate <= endOfYesterday) {
+          if (!activities.find(a => a.investorId === inv.id)) {
+            activities.push({ type: 'contact', date: inv.lastContact, investorName: inv.name, investorId: inv.id });
+          }
+        }
+      }
+    });
+    
+    return {
+      activities: activities.sort((a, b) => new Date(b.date) - new Date(a.date)),
+      emailsLogged,
+      callsLogged,
+      meetingsLogged,
+      notesAdded,
+      total: activities.length
+    };
+  }, [investors]);
+
   return (
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
@@ -250,6 +299,83 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
             );
           })}
         </div>
+      </div>
+
+      {/* Yesterday's Activity Summary */}
+      <div style={{ ...S.card, marginTop: '16px', background: 'linear-gradient(135deg, #181922 0%, #1a1b28 100%)', border: '1px solid #22C55E40' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '20px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span style={{ fontSize: '24px' }}>📅</span>
+            <div>
+              <div style={{ fontSize: '16px', fontWeight: '700', color: '#22C55E' }}>Yesterday's Activity</div>
+              <div style={{ fontSize: '11px', color: '#9BA3B5' }}>{yesterday.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+            </div>
+          </div>
+          <div style={{ fontSize: '12px', color: yesterdayActivity.total > 0 ? '#22C55E' : '#9BA3B5', background: yesterdayActivity.total > 0 ? '#22C55E20' : '#2A2D3E', padding: '6px 12px', borderRadius: '12px', fontWeight: '600' }}>
+            {yesterdayActivity.total} {yesterdayActivity.total === 1 ? 'activity' : 'activities'}
+          </div>
+        </div>
+        
+        {/* Activity Stats */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginBottom: '20px' }}>
+          {[
+            { icon: '📧', label: 'Emails', count: yesterdayActivity.emailsLogged, color: '#60A5FA' },
+            { icon: '📞', label: 'Calls', count: yesterdayActivity.callsLogged, color: '#22C55E' },
+            { icon: '🤝', label: 'Meetings', count: yesterdayActivity.meetingsLogged, color: '#F59E0B' },
+            { icon: '📝', label: 'Notes', count: yesterdayActivity.notesAdded, color: '#A78BFA' },
+          ].map((stat, idx) => (
+            <div key={idx} style={{ background: '#0C0C12', borderRadius: '10px', padding: '14px', textAlign: 'center', border: `1px solid ${stat.color}30` }}>
+              <div style={{ fontSize: '20px', marginBottom: '4px' }}>{stat.icon}</div>
+              <div style={{ fontSize: '20px', fontWeight: '800', color: stat.color }}>{stat.count}</div>
+              <div style={{ fontSize: '11px', color: '#9BA3B5' }}>{stat.label}</div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Activity Feed */}
+        {yesterdayActivity.activities.length > 0 ? (
+          <div style={{ maxHeight: '200px', overflowY: 'auto' }}>
+            {yesterdayActivity.activities.slice(0, 10).map((act, idx) => (
+              <div 
+                key={idx} 
+                onClick={() => { setSelectedId(act.investorId); setView('pipeline'); }}
+                style={{ 
+                  padding: '10px 12px', 
+                  background: '#0C0C12', 
+                  borderRadius: '8px', 
+                  marginBottom: '8px', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '12px',
+                  cursor: 'pointer',
+                  border: '1px solid #2A2D3E',
+                  transition: 'border-color 0.2s'
+                }}
+                onMouseEnter={e => e.currentTarget.style.borderColor = '#22C55E'}
+                onMouseLeave={e => e.currentTarget.style.borderColor = '#2A2D3E'}
+              >
+                <span style={{ fontSize: '16px' }}>
+                  {act.type === 'email' ? '📧' : act.type === 'call' ? '📞' : act.type === 'meeting' ? '🤝' : act.type === 'note' ? '📝' : '✓'}
+                </span>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: '13px', fontWeight: '600', color: '#E8EAF0' }}>{act.investorName}</div>
+                  <div style={{ fontSize: '11px', color: '#9BA3B5' }}>
+                    {act.type.charAt(0).toUpperCase() + act.type.slice(1)}{act.note ? ` — ${act.note.substring(0, 50)}${act.note.length > 50 ? '...' : ''}` : ''}
+                  </div>
+                </div>
+                <div style={{ fontSize: '10px', color: '#6B7280' }}>
+                  {new Date(act.date).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ textAlign: 'center', padding: '24px', color: '#6B7280' }}>
+            <div style={{ fontSize: '32px', marginBottom: '8px' }}>📭</div>
+            <div style={{ fontSize: '14px' }}>No activity logged yesterday</div>
+            <div style={{ fontSize: '12px', marginTop: '4px' }}>Log emails, calls, and meetings in investor profiles to track your progress!</div>
+          </div>
+        )}
       </div>
 
       {/* AI Recommendations */}
