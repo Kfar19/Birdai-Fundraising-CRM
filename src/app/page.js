@@ -39,14 +39,89 @@ function saveInvestors(investors) {
 // ═══════════════════════════════════════════════════════════════
 
 const S = {
-  card: { background: '#13151A', border: '1px solid #2D3748', borderRadius: '12px', padding: '24px', marginBottom: '20px' },
-  cardTitle: { fontSize: '15px', fontWeight: '700', color: '#FFFFFF', marginBottom: '16px', letterSpacing: '0.5px', textTransform: 'uppercase' },
-  badge: (color) => ({ display: 'inline-block', padding: '5px 10px', borderRadius: '6px', fontSize: '12px', fontWeight: '600', background: color + '20', color, letterSpacing: '0.3px' }),
-  input: { width: '100%', padding: '10px 14px', background: '#0A0A0F', border: '1px solid #2D3748', borderRadius: '8px', color: '#F1F5F9', fontSize: '14px', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box' },
-  select: { padding: '10px 14px', background: '#0A0A0F', border: '1px solid #2D3748', borderRadius: '8px', color: '#F1F5F9', fontSize: '14px', fontFamily: 'inherit', outline: 'none' },
-  btn: (v = 'default') => ({ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'inherit', background: v === 'primary' ? '#10B981' : v === 'danger' ? '#EF4444' : '#2D3748', color: v === 'primary' ? '#000' : '#FFFFFF', transition: 'all 0.15s' }),
-  th: { textAlign: 'left', padding: '14px 16px', fontSize: '12px', fontWeight: '700', color: '#A0AEC0', letterSpacing: '0.5px', textTransform: 'uppercase', borderBottom: '2px solid #2D3748' },
-  td: { padding: '14px 16px', fontSize: '14px', borderBottom: '1px solid rgba(45,55,72,0.3)', verticalAlign: 'top', color: '#E2E8F0' },
+  card: { 
+    background: 'linear-gradient(145deg, #181922 0%, #14151F 100%)', 
+    border: '1px solid #2A2D3E', 
+    borderRadius: '16px', 
+    padding: '28px', 
+    marginBottom: '20px',
+    boxShadow: '0 4px 24px rgba(0,0,0,0.2)'
+  },
+  cardTitle: { 
+    fontSize: '14px', 
+    fontWeight: '700', 
+    color: '#9BA3B5', 
+    marginBottom: '18px', 
+    letterSpacing: '1.5px', 
+    textTransform: 'uppercase' 
+  },
+  badge: (color) => ({ 
+    display: 'inline-block', 
+    padding: '6px 12px', 
+    borderRadius: '8px', 
+    fontSize: '13px', 
+    fontWeight: '600', 
+    background: color + '18', 
+    color, 
+    letterSpacing: '0.2px',
+    border: `1px solid ${color}30`
+  }),
+  input: { 
+    width: '100%', 
+    padding: '12px 16px', 
+    background: '#0C0C12', 
+    border: '1px solid #2A2D3E', 
+    borderRadius: '10px', 
+    color: '#E8EAF0', 
+    fontSize: '15px', 
+    fontFamily: 'inherit', 
+    outline: 'none', 
+    boxSizing: 'border-box',
+    transition: 'border-color 0.2s, box-shadow 0.2s'
+  },
+  select: { 
+    padding: '12px 16px', 
+    background: '#0C0C12', 
+    border: '1px solid #2A2D3E', 
+    borderRadius: '10px', 
+    color: '#E8EAF0', 
+    fontSize: '14px', 
+    fontFamily: 'inherit', 
+    outline: 'none',
+    cursor: 'pointer'
+  },
+  btn: (v = 'default') => ({ 
+    padding: '12px 24px', 
+    borderRadius: '10px', 
+    border: 'none', 
+    cursor: 'pointer', 
+    fontSize: '14px', 
+    fontWeight: '600', 
+    fontFamily: 'inherit', 
+    background: v === 'primary' ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' : v === 'danger' ? '#F87171' : '#2A2D3E', 
+    color: v === 'primary' ? '#000' : '#E8EAF0', 
+    transition: 'all 0.2s',
+    boxShadow: v === 'primary' ? '0 4px 14px rgba(34,197,94,0.3)' : 'none'
+  }),
+  th: { 
+    textAlign: 'left', 
+    padding: '16px 18px', 
+    fontSize: '12px', 
+    fontWeight: '700', 
+    color: '#9BA3B5', 
+    letterSpacing: '1px', 
+    textTransform: 'uppercase', 
+    borderBottom: '2px solid #2A2D3E',
+    background: '#14151F'
+  },
+  td: { 
+    padding: '16px 18px', 
+    fontSize: '15px', 
+    borderBottom: '1px solid #1A1B28', 
+    verticalAlign: 'middle', 
+    color: '#E8EAF0',
+    lineHeight: '1.5'
+  },
 };
 
 // ═══════════════════════════════════════════════════════════════
@@ -1286,17 +1361,17 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh' }}>
       {/* Header */}
-      <header style={{ background: 'linear-gradient(135deg, #0F1419, #1A1A2E)', borderBottom: '1px solid #2D3748', padding: '18px 28px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <div style={{ width: '40px', height: '40px', background: 'linear-gradient(135deg, #10B981, #3B82F6)', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '18px', color: '#000' }}>B</div>
+      <header style={{ background: 'linear-gradient(180deg, #181922 0%, #14151F 100%)', borderBottom: '1px solid #2A2D3E', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <div style={{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '20px', color: '#000', boxShadow: '0 4px 14px rgba(34,197,94,0.3)' }}>B</div>
           <div>
-            <div style={{ fontSize: '20px', fontWeight: '700', letterSpacing: '2px', color: '#FFFFFF' }}>BIRDAI</div>
-            <div style={{ fontSize: '12px', color: '#A0AEC0', letterSpacing: '0.5px' }}>FUNDRAISING COMMAND CENTER</div>
+            <div style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '3px', color: '#FFFFFF' }}>BIRDAI</div>
+            <div style={{ fontSize: '12px', color: '#9BA3B5', letterSpacing: '1px', fontWeight: '500' }}>FUNDRAISING COMMAND CENTER</div>
           </div>
         </div>
-        <nav style={{ display: 'flex', gap: '4px', background: '#13151A', borderRadius: '10px', padding: '4px' }}>
-          {[{ k: 'dashboard', l: 'Dashboard' }, { k: 'pipeline', l: 'Pipeline' }, { k: 'outreach', l: 'Outreach Intel' }, { k: 'playbook', l: 'Pitch Playbook' }].map(t => (
-            <button key={t.k} onClick={() => setView(t.k)} style={{ padding: '10px 20px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'inherit', background: view === t.k ? '#2D3748' : 'transparent', color: view === t.k ? '#FFFFFF' : '#A0AEC0' }}>{t.l}</button>
+        <nav style={{ display: 'flex', gap: '4px', background: '#0C0C12', borderRadius: '12px', padding: '5px', border: '1px solid #2A2D3E' }}>
+          {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'pipeline', l: '🎯 Pipeline' }, { k: 'outreach', l: '📧 Outreach' }, { k: 'playbook', l: '📖 Playbook' }].map(t => (
+            <button key={t.k} onClick={() => setView(t.k)} style={{ padding: '12px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'inherit', background: view === t.k ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' : 'transparent', color: view === t.k ? '#000' : '#9BA3B5', transition: 'all 0.2s' }}>{t.l}</button>
           ))}
         </nav>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
