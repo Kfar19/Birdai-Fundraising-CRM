@@ -132,6 +132,7 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
   const committed = investors.filter(i => i.stage === 'committed');
   const totalCommitted = committed.reduce((sum, i) => sum + (i.commitment || 0), 0);
   const active = investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage));
+  const activeTotal = active.reduce((sum, i) => sum + (i.commitment || 0), 0);
   const needsAction = investors.filter(i => { const u = getOutreachUrgency(i); return u && u.level === 'now'; });
 
   const byStage = {};
@@ -195,7 +196,7 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
         {[
           { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC', filter: { stage: 'all', activeOnly: false } },
           { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6, filter: { stage: 'committed', activeOnly: false } },
-          { label: 'ACTIVE PIPELINE', value: active.length, sub: 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all', activeOnly: true } },
+          { label: 'ACTIVE PIPELINE', value: active.length, sub: activeTotal > 0 ? `$${(activeTotal / 1e6).toFixed(2)}M in progress` : 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all', activeOnly: true } },
           { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', filter: { priority: 'high', stage: 'all', activeOnly: false } },
         ].map((kpi, idx) => (
           <div 
