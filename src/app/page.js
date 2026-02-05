@@ -5,7 +5,7 @@ import { useSession, signIn, signOut } from 'next-auth/react';
 import { INVESTOR_TYPES, PIPELINE_STAGES, PITCH_ANGLES } from '../lib/constants';
 import { calculateEngagementScore, getOutreachUrgency, generateRecommendations, suggestPitchAngle, getAIPrioritizedInvestors } from '../lib/engine';
 import { buildInitialInvestors } from '../data/investors';
-import { supabase, fetchInvestors, bulkUpsertInvestors, subscribeToChanges, unsubscribeFromChanges, fromDbFormat } from '../lib/supabase';
+import { supabase, fetchInvestors, bulkUpsertInvestors, subscribeToChanges, unsubscribeFromChanges, fromDbFormat, deleteInvestor } from '../lib/supabase';
 
 // ═══════════════════════════════════════════════════════════════
 // STORAGE — uses localStorage + Supabase for persistence
@@ -414,9 +414,12 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
         </div>
         <div style={{ display: 'flex', gap: '8px' }}>
           <button 
-            onClick={() => {
+            onClick={async () => {
               if (confirm(`Delete ${investor.name}? This cannot be undone.`)) {
+                // Delete from local state
                 setInvestors(prev => prev.filter(i => i.id !== investor.id));
+                // Delete from Supabase
+                await deleteInvestor(investor.id);
                 onClose();
               }
             }} 
