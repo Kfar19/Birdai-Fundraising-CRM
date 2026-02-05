@@ -902,6 +902,39 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
 function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filters, setFilters }) {
   const [viewMode, setViewMode] = useState('table'); // 'table' or 'kanban'
   const [draggedInvestor, setDraggedInvestor] = useState(null);
+  const [selectedIds, setSelectedIds] = useState(new Set());
+  const [bulkMode, setBulkMode] = useState(false);
+  
+  const toggleSelect = (id) => {
+    setSelectedIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
+  
+  const selectAll = () => {
+    setSelectedIds(new Set(filtered.map(i => i.id)));
+  };
+  
+  const clearSelection = () => {
+    setSelectedIds(new Set());
+  };
+  
+  const bulkUpdateStage = async (newStage) => {
+    const autoHighPriority = ['committed', 'term-sheet', 'in-diligence'].includes(newStage);
+    setInvestors(prev => prev.map(i => 
+      selectedIds.has(i.id) 
+        ? { ...i, stage: newStage, priority: autoHighPriority ? 'high' : i.priority }
+        : i
+    ));
+    setSelectedIds(new Set());
+    setBulkMode(false);
+  };
   
   const filtered = useMemo(() => {
     let r = [...investors];
@@ -1004,7 +1037,44 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             </select>
           )}
           <span style={{ fontSize: '11px', color: '#64748B' }}>{filtered.length} results</span>
+          
+          {/* Bulk Mode Toggle */}
+          <button 
+            onClick={() => { setBulkMode(!bulkMode); if (bulkMode) clearSelection(); }}
+            style={{ ...S.btn(), fontSize: '11px', padding: '8px 14px', background: bulkMode ? '#60A5FA20' : 'transparent', color: bulkMode ? '#60A5FA' : '#9BA3B5', border: '1px solid #2A2D3E' }}
+          >
+            {bulkMode ? '✓ Bulk Mode ON' : '☐ Bulk Edit'}
+          </button>
         </div>
+        
+        {/* Bulk Action Bar */}
+        {bulkMode && selectedIds.size > 0 && (
+          <div style={{ display: 'flex', gap: '12px', alignItems: 'center', padding: '14px 18px', background: 'linear-gradient(135deg, #60A5FA15, #3B82F615)', borderRadius: '10px', marginBottom: '16px', border: '1px solid #60A5FA40' }}>
+            <span style={{ fontSize: '14px', fontWeight: '600', color: '#60A5FA' }}>
+              {selectedIds.size} selected
+            </span>
+            <span style={{ color: '#2A2D3E' }}>|</span>
+            <span style={{ fontSize: '12px', color: '#9BA3B5' }}>Move to:</span>
+            {Object.entries(PIPELINE_STAGES).map(([key, stage]) => (
+              <button
+                key={key}
+                onClick={() => bulkUpdateStage(key)}
+                style={{ ...S.btn(), fontSize: '11px', padding: '6px 12px', background: stage.color + '20', color: stage.color, border: `1px solid ${stage.color}40` }}
+              >
+                {stage.label}
+              </button>
+            ))}
+            <span style={{ flex: 1 }} />
+            <button onClick={selectAll} style={{ ...S.btn(), fontSize: '11px', padding: '6px 12px' }}>Select All</button>
+            <button onClick={clearSelection} style={{ ...S.btn(), fontSize: '11px', padding: '6px 12px' }}>Clear</button>
+          </div>
+        )}
+        
+        {bulkMode && selectedIds.size === 0 && (
+          <div style={{ padding: '12px 16px', background: '#1A1B28', borderRadius: '8px', marginBottom: '16px', border: '1px dashed #2A2D3E' }}>
+            <span style={{ fontSize: '13px', color: '#9BA3B5' }}>👆 Click on investors to select them, then choose a stage to move them to</span>
+          </div>
+        )}
 
         {/* KANBAN VIEW */}
         {viewMode === 'kanban' && (
@@ -1091,6 +1161,7 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
+              {bulkMode && <th style={{ ...S.th, width: '40px', textAlign: 'center' }}>☐</th>}
               <th style={S.th}>Name / Company</th>
               <th style={S.th}>Type</th>
               <th style={S.th}>Stage</th>
@@ -1104,8 +1175,34 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
               const tc = INVESTOR_TYPES[i.type] || INVESTOR_TYPES.other;
               const sc = PIPELINE_STAGES[i.stage] || PIPELINE_STAGES.identified;
               const score = calculateEngagementScore(i);
+              const isSelected = selectedIds.has(i.id);
               return (
-                <tr key={i.id} style={{ cursor: 'pointer', background: selectedId === i.id ? 'rgba(30,41,59,0.3)' : 'transparent' }} onClick={() => setSelectedId(i.id)}>
+                <tr 
+                  key={i.id} 
+                  style={{ 
+                    cursor: 'pointer', 
+                    background: isSelected ? 'rgba(96,165,250,0.15)' : selectedId === i.id ? 'rgba(30,41,59,0.3)' : 'transparent',
+                    borderLeft: isSelected ? '3px solid #60A5FA' : '3px solid transparent'
+                  }} 
+                  onClick={() => bulkMode ? toggleSelect(i.id) : setSelectedId(i.id)}
+                >
+                  {bulkMode && (
+                    <td style={{ ...S.td, textAlign: 'center', width: '40px' }}>
+                      <div style={{ 
+                        width: '20px', 
+                        height: '20px', 
+                        borderRadius: '4px', 
+                        border: `2px solid ${isSelected ? '#60A5FA' : '#2A2D3E'}`,
+                        background: isSelected ? '#60A5FA' : 'transparent',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        margin: '0 auto'
+                      }}>
+                        {isSelected && <span style={{ color: '#000', fontSize: '12px', fontWeight: '800' }}>✓</span>}
+                      </div>
+                    </td>
+                  )}
                   <td style={S.td}>
                     <div style={{ fontWeight: '600', color: '#F8FAFC' }}>{i.name}</div>
                     {i.company && i.company !== i.name && <div style={{ fontSize: '10px', color: '#64748B' }}>{i.company}</div>}
