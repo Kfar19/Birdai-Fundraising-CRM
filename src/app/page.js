@@ -193,10 +193,10 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
-          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC', filter: { stage: 'all' } },
-          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6, filter: { stage: 'committed' } },
-          { label: 'ACTIVE PIPELINE', value: active.length, sub: 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all' }, activeOnly: true },
-          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', filter: { priority: 'high', stage: 'all' }, urgentOnly: true },
+          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC', filter: { stage: 'all', activeOnly: false } },
+          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6, filter: { stage: 'committed', activeOnly: false } },
+          { label: 'ACTIVE PIPELINE', value: active.length, sub: 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all', activeOnly: true } },
+          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', filter: { priority: 'high', stage: 'all', activeOnly: false } },
         ].map((kpi, idx) => (
           <div 
             key={idx} 
@@ -942,6 +942,7 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
     if (filters.type !== 'all') r = r.filter(i => i.type === filters.type);
     if (viewMode === 'table' && filters.stage !== 'all') r = r.filter(i => i.stage === filters.stage);
     if (filters.priority !== 'all') r = r.filter(i => i.priority === filters.priority);
+    if (filters.activeOnly) r = r.filter(i => !['committed', 'passed', 'identified'].includes(i.stage));
     if (filters.source !== 'all') r = r.filter(i => i.source === filters.source);
     r.sort((a, b) => {
       if (filters.sort === 'engagement') return calculateEngagementScore(b) - calculateEngagementScore(a);
@@ -1063,6 +1064,17 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             >
               🔄 Clear Active Pipeline ({investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length})
             </button>
+          )}
+          
+          {/* Active Filter Indicator */}
+          {filters.activeOnly && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '8px 14px', background: '#3B82F620', borderRadius: '8px', border: '1px solid #3B82F640' }}>
+              <span style={{ color: '#3B82F6', fontWeight: '600', fontSize: '12px' }}>🎯 Showing Active Pipeline Only</span>
+              <button 
+                onClick={() => setFilters(f => ({ ...f, activeOnly: false }))}
+                style={{ background: 'none', border: 'none', color: '#3B82F6', cursor: 'pointer', fontSize: '14px', padding: '0 4px' }}
+              >✕</button>
+            </div>
           )}
         </div>
         
@@ -1442,7 +1454,7 @@ export default function Home() {
   const [investors, setInvestors] = useState([]);
   const [view, setView] = useState('dashboard');
   const [selectedId, setSelectedId] = useState(null);
-  const [filters, setFilters] = useState({ search: '', type: 'all', stage: 'all', source: 'all', priority: 'all', sort: 'name' });
+  const [filters, setFilters] = useState({ search: '', type: 'all', stage: 'all', source: 'all', priority: 'all', sort: 'name', activeOnly: false });
   const [showAdd, setShowAdd] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [syncing, setSyncing] = useState(false);
