@@ -1270,7 +1270,7 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
                         outline: 'none'
                       }}
                     >
-                      <option value="identified" style={{ background: '#0C0C12', color: '#64748B' }}>📋 Identified</option>
+                      <option value="identified" style={{ background: '#0C0C12', color: '#64748B' }}>📋 General Population</option>
                       <option value="active" style={{ background: '#0C0C12', color: '#3B82F6' }}>🎯 Active Pipeline</option>
                       <option value="committed" style={{ background: '#0C0C12', color: '#10B981' }}>✅ Committed</option>
                       <option value="passed" style={{ background: '#0C0C12', color: '#6B7280' }}>⏸️ Passed</option>
