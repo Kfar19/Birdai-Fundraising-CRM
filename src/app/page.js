@@ -1047,21 +1047,23 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
           </button>
           
           {/* Quick Reset Button */}
-          <button 
-            onClick={() => {
-              const activeCount = investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length;
-              if (activeCount > 0 && confirm(`Reset ${activeCount} "active" investors back to "Identified"? (Keeps Committed and Passed as-is)`)) {
-                setInvestors(prev => prev.map(i => 
-                  !['committed', 'passed', 'identified'].includes(i.stage)
-                    ? { ...i, stage: 'identified' }
-                    : i
-                ));
-              }
-            }}
-            style={{ ...S.btn(), fontSize: '11px', padding: '8px 14px', background: '#F5980B20', color: '#F59E0B', border: '1px solid #F59E0B40' }}
-          >
-            ⚡ Reset Active → Identified
-          </button>
+          {investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length > 0 && (
+            <button 
+              onClick={() => {
+                const activeCount = investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length;
+                if (confirm(`Move ${activeCount} investors from Active Pipeline back to General Population?\n\n(Committed and Passed investors stay as-is)`)) {
+                  setInvestors(prev => prev.map(i => 
+                    !['committed', 'passed', 'identified'].includes(i.stage)
+                      ? { ...i, stage: 'identified' }
+                      : i
+                  ));
+                }
+              }}
+              style={{ ...S.btn(), fontSize: '12px', padding: '10px 16px', background: '#EF444420', color: '#EF4444', border: '2px solid #EF444460', fontWeight: '700' }}
+            >
+              🔄 Clear Active Pipeline ({investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length})
+            </button>
+          )}
         </div>
         
         {/* Bulk Action Bar */}
