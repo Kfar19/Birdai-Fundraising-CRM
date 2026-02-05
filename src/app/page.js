@@ -267,8 +267,44 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
   const [newNote, setNewNote] = useState('');
   const [researching, setResearching] = useState(false);
   const [researchResult, setResearchResult] = useState(null);
+  const [aiResearch, setAiResearch] = useState(null);
+  const [aiLoading, setAiLoading] = useState(false);
 
-  useEffect(() => { setForm({ ...investor }); setEditing(false); setResearchResult(null); }, [investor.id]);
+  // Auto-fetch AI research when investor changes
+  useEffect(() => { 
+    setForm({ ...investor }); 
+    setEditing(false); 
+    setResearchResult(null);
+    
+    // Auto-fetch AI outreach suggestions
+    const fetchAiResearch = async () => {
+      // Skip if already committed or passed
+      if (['committed', 'passed'].includes(investor.stage)) {
+        setAiResearch(null);
+        return;
+      }
+      
+      setAiLoading(true);
+      try {
+        const res = await fetch('/api/ai-research', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ investor }),
+        });
+        const data = await res.json();
+        if (data.success && data.research) {
+          setAiResearch(data.research);
+        } else if (data.fallback) {
+          setAiResearch(data.fallback);
+        }
+      } catch (err) {
+        console.error('AI research error:', err);
+      }
+      setAiLoading(false);
+    };
+    
+    fetchAiResearch();
+  }, [investor.id]);
 
   const save = () => {
     setInvestors(prev => prev.map(i => i.id === investor.id ? { ...form } : i));
@@ -391,6 +427,82 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
           <button onClick={onClose} style={{ ...S.btn(), padding: '6px 10px', fontSize: '16px' }}>✕</button>
         </div>
       </div>
+
+      {/* AI OUTREACH SUGGESTIONS - Most Important Section */}
+      {aiLoading && (
+        <div style={{ padding: '20px', background: 'linear-gradient(135deg, #3B82F610, #8B5CF610)', borderBottom: '1px solid #3B82F630' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div style={{ fontSize: '20px', animation: 'spin 1s linear infinite' }}>🤖</div>
+            <div>
+              <div style={{ fontSize: '14px', fontWeight: '700', color: '#3B82F6' }}>AI Agent Researching...</div>
+              <div style={{ fontSize: '12px', color: '#64748B' }}>Generating personalized outreach for {investor.name}</div>
+            </div>
+          </div>
+        </div>
+      )}
+      
+      {aiResearch && !aiLoading && !['committed', 'passed'].includes(form.stage) && (
+        <div style={{ padding: '20px', background: 'linear-gradient(135deg, #10B98110, #3B82F610)', borderBottom: '2px solid #10B98150' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+            <span style={{ fontSize: '20px' }}>🤖</span>
+            <span style={{ fontSize: '14px', fontWeight: '800', color: '#10B981', letterSpacing: '0.5px' }}>AI OUTREACH AGENT</span>
+          </div>
+          
+          {/* Who They Are */}
+          {aiResearch.whoTheyAre && (
+            <div style={{ marginBottom: '16px', padding: '12px', background: '#0A0A0F', borderRadius: '8px', border: '1px solid #1E293B' }}>
+              <div style={{ fontSize: '10px', color: '#64748B', letterSpacing: '1px', fontWeight: '700', marginBottom: '6px' }}>👤 WHO THEY ARE</div>
+              <div style={{ fontSize: '13px', color: '#E2E8F0', lineHeight: '1.5' }}>{aiResearch.whoTheyAre}</div>
+            </div>
+          )}
+          
+          {/* Opening Line - Most Important */}
+          {aiResearch.openingLine && (
+            <div style={{ marginBottom: '16px', padding: '14px', background: '#3B82F615', borderRadius: '8px', border: '2px solid #3B82F650' }}>
+              <div style={{ fontSize: '10px', color: '#3B82F6', letterSpacing: '1px', fontWeight: '700', marginBottom: '8px' }}>💬 YOUR OPENING LINE</div>
+              <div style={{ fontSize: '14px', color: '#FFFFFF', lineHeight: '1.6', fontStyle: 'italic' }}>"{aiResearch.openingLine}"</div>
+              <button 
+                onClick={() => navigator.clipboard.writeText(aiResearch.openingLine)}
+                style={{ marginTop: '8px', fontSize: '11px', padding: '4px 10px', background: '#3B82F620', border: '1px solid #3B82F6', borderRadius: '4px', color: '#3B82F6', cursor: 'pointer' }}
+              >
+                📋 Copy
+              </button>
+            </div>
+          )}
+          
+          {/* Key Hook */}
+          {aiResearch.keyHook && (
+            <div style={{ marginBottom: '16px', padding: '12px', background: '#F59E0B10', borderRadius: '8px', border: '1px solid #F59E0B40' }}>
+              <div style={{ fontSize: '10px', color: '#F59E0B', letterSpacing: '1px', fontWeight: '700', marginBottom: '6px' }}>🎯 KEY HOOK FOR THIS INVESTOR</div>
+              <div style={{ fontSize: '13px', color: '#E2E8F0', lineHeight: '1.5' }}>{aiResearch.keyHook}</div>
+            </div>
+          )}
+          
+          {/* Subject Line */}
+          {aiResearch.subjectLine && (
+            <div style={{ marginBottom: '16px', padding: '10px 12px', background: '#0A0A0F', borderRadius: '6px', border: '1px solid #1E293B', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div>
+                <span style={{ fontSize: '10px', color: '#64748B', marginRight: '8px' }}>SUBJECT:</span>
+                <span style={{ fontSize: '13px', color: '#FFFFFF' }}>{aiResearch.subjectLine}</span>
+              </div>
+              <button 
+                onClick={() => navigator.clipboard.writeText(aiResearch.subjectLine)}
+                style={{ fontSize: '10px', padding: '3px 8px', background: 'transparent', border: '1px solid #3B82F6', borderRadius: '4px', color: '#3B82F6', cursor: 'pointer' }}
+              >
+                Copy
+              </button>
+            </div>
+          )}
+          
+          {/* What to Avoid */}
+          {aiResearch.whatToAvoid && (
+            <div style={{ padding: '10px 12px', background: '#EF444410', borderRadius: '6px', border: '1px solid #EF444430' }}>
+              <div style={{ fontSize: '10px', color: '#EF4444', letterSpacing: '1px', fontWeight: '700', marginBottom: '4px' }}>⚠️ AVOID</div>
+              <div style={{ fontSize: '12px', color: '#FCA5A5', lineHeight: '1.4' }}>{aiResearch.whatToAvoid}</div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Research Results */}
       {researchResult && (
