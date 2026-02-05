@@ -40,87 +40,105 @@ function saveInvestors(investors) {
 
 const S = {
   card: { 
-    background: 'linear-gradient(145deg, #181922 0%, #14151F 100%)', 
-    border: '1px solid #2A2D3E', 
-    borderRadius: '16px', 
+    background: 'linear-gradient(165deg, rgba(24,24,27,0.95) 0%, rgba(17,17,20,0.98) 100%)', 
+    border: '1px solid rgba(63,63,70,0.5)', 
+    borderRadius: '20px', 
     padding: '28px', 
     marginBottom: '20px',
-    boxShadow: '0 4px 24px rgba(0,0,0,0.2)'
+    boxShadow: '0 8px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.02) inset',
+    backdropFilter: 'blur(20px)',
   },
   cardTitle: { 
-    fontSize: '14px', 
+    fontSize: '12px', 
     fontWeight: '700', 
-    color: '#9BA3B5', 
-    marginBottom: '18px', 
-    letterSpacing: '1.5px', 
-    textTransform: 'uppercase' 
+    color: '#71717A', 
+    marginBottom: '20px', 
+    letterSpacing: '1.8px', 
+    textTransform: 'uppercase',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
   },
   badge: (color) => ({ 
-    display: 'inline-block', 
-    padding: '6px 12px', 
-    borderRadius: '8px', 
-    fontSize: '13px', 
+    display: 'inline-flex', 
+    alignItems: 'center',
+    gap: '6px',
+    padding: '7px 14px', 
+    borderRadius: '10px', 
+    fontSize: '12px', 
     fontWeight: '600', 
-    background: color + '18', 
+    background: `linear-gradient(135deg, ${color}15 0%, ${color}08 100%)`, 
     color, 
-    letterSpacing: '0.2px',
-    border: `1px solid ${color}30`
+    letterSpacing: '0.3px',
+    border: `1px solid ${color}25`,
+    boxShadow: `0 2px 8px ${color}10`
   }),
   input: { 
     width: '100%', 
-    padding: '12px 16px', 
-    background: '#0C0C12', 
-    border: '1px solid #2A2D3E', 
-    borderRadius: '10px', 
-    color: '#E8EAF0', 
-    fontSize: '15px', 
+    padding: '14px 18px', 
+    background: 'rgba(9,9,11,0.8)', 
+    border: '1px solid #27272A', 
+    borderRadius: '12px', 
+    color: '#FAFAFA', 
+    fontSize: '14px', 
     fontFamily: 'inherit', 
     outline: 'none', 
     boxSizing: 'border-box',
-    transition: 'border-color 0.2s, box-shadow 0.2s'
+    transition: 'all 0.2s ease',
   },
   select: { 
-    padding: '12px 16px', 
-    background: '#0C0C12', 
-    border: '1px solid #2A2D3E', 
-    borderRadius: '10px', 
-    color: '#E8EAF0', 
-    fontSize: '14px', 
+    padding: '12px 18px', 
+    background: 'rgba(9,9,11,0.8)', 
+    border: '1px solid #27272A', 
+    borderRadius: '12px', 
+    color: '#E4E4E7', 
+    fontSize: '13px', 
     fontFamily: 'inherit', 
     outline: 'none',
-    cursor: 'pointer'
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
   },
   btn: (v = 'default') => ({ 
     padding: '12px 24px', 
-    borderRadius: '10px', 
+    borderRadius: '12px', 
     border: 'none', 
     cursor: 'pointer', 
-    fontSize: '14px', 
+    fontSize: '13px', 
     fontWeight: '600', 
     fontFamily: 'inherit', 
-    background: v === 'primary' ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' : v === 'danger' ? '#F87171' : '#2A2D3E', 
-    color: v === 'primary' ? '#000' : '#E8EAF0', 
-    transition: 'all 0.2s',
-    boxShadow: v === 'primary' ? '0 4px 14px rgba(34,197,94,0.3)' : 'none'
+    letterSpacing: '0.3px',
+    background: v === 'primary' 
+      ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' 
+      : v === 'danger' 
+        ? 'linear-gradient(135deg, #EF4444 0%, #DC2626 100%)' 
+        : 'rgba(39,39,42,0.8)', 
+    color: v === 'primary' ? '#fff' : v === 'danger' ? '#fff' : '#E4E4E7', 
+    transition: 'all 0.2s ease',
+    boxShadow: v === 'primary' 
+      ? '0 4px 20px rgba(16,185,129,0.35), 0 0 0 1px rgba(255,255,255,0.1) inset' 
+      : v === 'danger'
+        ? '0 4px 20px rgba(239,68,68,0.35)'
+        : '0 2px 8px rgba(0,0,0,0.2)',
+    border: v === 'default' ? '1px solid #3F3F46' : 'none',
   }),
   th: { 
     textAlign: 'left', 
-    padding: '16px 18px', 
-    fontSize: '12px', 
+    padding: '18px 20px', 
+    fontSize: '11px', 
     fontWeight: '700', 
-    color: '#9BA3B5', 
-    letterSpacing: '1px', 
+    color: '#71717A', 
+    letterSpacing: '1.2px', 
     textTransform: 'uppercase', 
-    borderBottom: '2px solid #2A2D3E',
-    background: '#14151F'
+    borderBottom: '1px solid #27272A',
+    background: 'rgba(15,15,18,0.95)',
   },
   td: { 
-    padding: '16px 18px', 
-    fontSize: '15px', 
-    borderBottom: '1px solid #1A1B28', 
+    padding: '18px 20px', 
+    fontSize: '14px', 
+    borderBottom: '1px solid rgba(39,39,42,0.5)', 
     verticalAlign: 'middle', 
-    color: '#E8EAF0',
-    lineHeight: '1.5'
+    color: '#E4E4E7',
+    lineHeight: '1.5',
   },
 };
 
@@ -194,10 +212,10 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
     <div>
       <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', marginBottom: '24px' }}>
         {[
-          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#F8FAFC', filter: { stage: 'all', activeOnly: false } },
-          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', bar: totalCommitted / 2e6, filter: { stage: 'committed', activeOnly: false } },
-          { label: 'ACTIVE PIPELINE', value: active.length, sub: activeTotal > 0 ? `$${(activeTotal / 1e6).toFixed(2)}M in progress` : 'in progress', color: '#3B82F6', filter: { stage: 'all', priority: 'all', activeOnly: true } },
-          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', filter: { priority: 'high', stage: 'all', activeOnly: false } },
+          { label: 'TOTAL PIPELINE', value: investors.length, sub: 'contacts', color: '#A1A1AA', icon: '📊', filter: { stage: 'all', activeOnly: false } },
+          { label: 'COMMITTED', value: `$${(totalCommitted / 1e6).toFixed(2)}M`, sub: '/ $2M target', color: '#10B981', icon: '✅', bar: totalCommitted / 2e6, filter: { stage: 'committed', activeOnly: false } },
+          { label: 'ACTIVE PIPELINE', value: active.length, sub: activeTotal > 0 ? `$${(activeTotal / 1e6).toFixed(2)}M in progress` : 'in progress', color: '#3B82F6', icon: '🎯', filter: { stage: 'all', priority: 'all', activeOnly: true } },
+          { label: 'NEEDS ACTION', value: needsAction.length, sub: 'urgent', color: '#EF4444', icon: '⚡', filter: { priority: 'high', stage: 'all', activeOnly: false } },
         ].map((kpi, idx) => (
           <div 
             key={idx} 
@@ -208,46 +226,105 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
             style={{ 
               ...S.card, 
               cursor: 'pointer', 
-              transition: 'all 0.15s',
-              border: '1px solid transparent',
+              transition: 'all 0.25s ease',
+              border: '1px solid rgba(39,39,42,0.5)',
+              position: 'relative',
+              overflow: 'hidden',
             }}
-            onMouseEnter={e => { e.currentTarget.style.borderColor = kpi.color; e.currentTarget.style.transform = 'translateY(-2px)'; }}
-            onMouseLeave={e => { e.currentTarget.style.borderColor = 'transparent'; e.currentTarget.style.transform = 'translateY(0)'; }}
+            onMouseEnter={e => { 
+              e.currentTarget.style.borderColor = kpi.color + '50'; 
+              e.currentTarget.style.transform = 'translateY(-4px)'; 
+              e.currentTarget.style.boxShadow = `0 12px 40px ${kpi.color}20, 0 0 0 1px ${kpi.color}30`;
+            }}
+            onMouseLeave={e => { 
+              e.currentTarget.style.borderColor = 'rgba(39,39,42,0.5)'; 
+              e.currentTarget.style.transform = 'translateY(0)'; 
+              e.currentTarget.style.boxShadow = '0 8px 32px rgba(0,0,0,0.4)';
+            }}
           >
-            <div style={{ fontSize: '13px', color: kpi.color === '#F8FAFC' ? '#A0AEC0' : kpi.color, fontWeight: '700', letterSpacing: '0.5px', marginBottom: '10px' }}>{kpi.label}</div>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: '10px' }}>
-              <span style={{ fontSize: '36px', fontWeight: '800', color: kpi.color }}>{kpi.value}</span>
-              <span style={{ fontSize: '14px', color: '#A0AEC0' }}>{kpi.sub}</span>
+            {/* Glow effect */}
+            <div style={{ 
+              position: 'absolute', 
+              top: '-50%', 
+              right: '-50%', 
+              width: '100%', 
+              height: '100%', 
+              background: `radial-gradient(circle, ${kpi.color}08 0%, transparent 70%)`,
+              pointerEvents: 'none'
+            }} />
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+                <span style={{ fontSize: '16px' }}>{kpi.icon}</span>
+                <span style={{ fontSize: '11px', color: '#71717A', fontWeight: '700', letterSpacing: '1.5px', textTransform: 'uppercase' }}>{kpi.label}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'baseline', gap: '12px' }}>
+                <span style={{ fontSize: '42px', fontWeight: '800', color: kpi.color, letterSpacing: '-2px', lineHeight: 1 }}>{kpi.value}</span>
+                <span style={{ fontSize: '13px', color: '#71717A', fontWeight: '500' }}>{kpi.sub}</span>
+              </div>
             </div>
             {kpi.bar !== undefined && (
               <div style={{ marginTop: '8px', height: '4px', background: '#1E293B', borderRadius: '2px' }}>
-                <div style={{ height: '4px', background: '#10B981', borderRadius: '2px', width: `${Math.min(100, kpi.bar * 100)}%` }} />
+                <div style={{ 
+                  height: '4px', 
+                  background: 'linear-gradient(90deg, #10B981, #34D399)', 
+                  borderRadius: '4px', 
+                  width: `${Math.min(100, kpi.bar * 100)}%`,
+                  boxShadow: '0 0 12px rgba(16,185,129,0.5)'
+                }} />
               </div>
             )}
-            <div style={{ fontSize: '10px', color: '#64748B', marginTop: '8px' }}>Click to view →</div>
+            <div style={{ fontSize: '10px', color: '#52525B', marginTop: '12px', fontWeight: '500' }}>Click to view →</div>
           </div>
         ))}
       </div>
 
       {/* Pipeline Funnel */}
       <div style={S.card}>
-        <div style={{ ...S.cardTitle, marginBottom: '20px' }}>Pipeline Funnel</div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-end', height: '140px', paddingTop: '20px' }}>
+        <div style={{ ...S.cardTitle, marginBottom: '24px' }}>
+          <span style={{ fontSize: '16px' }}>📈</span>
+          Pipeline Funnel
+        </div>
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'flex-end', height: '160px', paddingTop: '20px' }}>
           {Object.entries(PIPELINE_STAGES).map(([key, stage]) => {
             const count = byStage[key] || 0;
             const maxCount = Math.max(...Object.values(byStage), 1);
-            const barHeight = Math.max(16, (count / maxCount) * 100);
+            const barHeight = Math.max(20, (count / maxCount) * 120);
             return (
               <div 
                 key={key} 
-                onClick={() => { setFilters(prev => ({ ...prev, stage: key, search: '' })); setView('pipeline'); }}
-                style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px', height: '100%', justifyContent: 'flex-end', cursor: 'pointer', transition: 'transform 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'}
-                onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
+                onClick={() => { setFilters(prev => ({ ...prev, stage: key, search: '', activeOnly: false })); setView('pipeline'); }}
+                style={{ 
+                  flex: 1, 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  alignItems: 'center', 
+                  gap: '8px', 
+                  height: '100%', 
+                  justifyContent: 'flex-end', 
+                  cursor: 'pointer', 
+                  transition: 'all 0.2s ease',
+                  padding: '8px 4px',
+                  borderRadius: '12px',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.transform = 'translateY(-4px)';
+                  e.currentTarget.style.background = 'rgba(39,39,42,0.3)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.background = 'transparent';
+                }}
               >
-                <span style={{ fontSize: '16px', fontWeight: '700', color: stage.color }}>{count}</span>
-                <div style={{ width: '100%', height: `${barHeight}px`, background: stage.color + '30', borderRadius: '6px 6px 0 0', border: `2px solid ${stage.color}50` }} />
-                <span style={{ fontSize: '12px', color: '#A0AEC0', textAlign: 'center', lineHeight: '1.4', minHeight: '32px' }}>{stage.label}</span>
+                <span style={{ fontSize: '18px', fontWeight: '800', color: stage.color, letterSpacing: '-1px' }}>{count}</span>
+                <div style={{ 
+                  width: '100%', 
+                  height: `${barHeight}px`, 
+                  background: `linear-gradient(180deg, ${stage.color}40 0%, ${stage.color}15 100%)`, 
+                  borderRadius: '8px 8px 4px 4px', 
+                  border: `1px solid ${stage.color}30`,
+                  boxShadow: count > 0 ? `0 4px 20px ${stage.color}20` : 'none',
+                }} />
+                <span style={{ fontSize: '11px', color: '#71717A', textAlign: 'center', lineHeight: '1.3', minHeight: '28px', fontWeight: '500' }}>{stage.label}</span>
               </div>
             );
           })}
@@ -280,18 +357,40 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
 
         {/* Type Breakdown */}
         <div style={S.card}>
-          <div style={S.cardTitle}>By Investor Type</div>
+          <div style={S.cardTitle}>
+            <span style={{ fontSize: '16px' }}>👥</span>
+            By Investor Type
+          </div>
           {Object.entries(byType).sort((a, b) => b[1] - a[1]).map(([type, count]) => {
             const cfg = INVESTOR_TYPES[type] || INVESTOR_TYPES.other;
             return (
               <div 
                 key={type} 
-                onClick={() => { setFilters(prev => ({ ...prev, type: type, stage: 'all', search: '' })); setView('pipeline'); }}
-                style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '8px 4px', marginLeft: '-4px', marginRight: '-4px', cursor: 'pointer', borderRadius: '6px', transition: 'background 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,130,246,0.1)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                onClick={() => { setFilters(prev => ({ ...prev, type: type, stage: 'all', search: '', activeOnly: false })); setView('pipeline'); }}
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '12px 14px', 
+                  marginBottom: '8px',
+                  cursor: 'pointer', 
+                  borderRadius: '12px', 
+                  transition: 'all 0.2s ease',
+                  background: 'rgba(17,17,20,0.5)',
+                  border: '1px solid rgba(39,39,42,0.3)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = 'rgba(99,102,241,0.1)';
+                  e.currentTarget.style.borderColor = 'rgba(99,102,241,0.3)';
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(17,17,20,0.5)';
+                  e.currentTarget.style.borderColor = 'rgba(39,39,42,0.3)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
               >
-                <span style={{ fontSize: '14px', color: '#E2E8F0' }}>{cfg.icon} {cfg.label}</span>
+                <span style={{ fontSize: '14px', color: '#E4E4E7', fontWeight: '500' }}>{cfg.icon} {cfg.label}</span>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                   <div style={{ width: `${Math.min(140, (count / investors.length) * 300)}px`, height: '6px', background: cfg.color, borderRadius: '3px' }} />
                   <span style={{ fontSize: '14px', fontWeight: '700', color: cfg.color, minWidth: '32px', textAlign: 'right' }}>{count}</span>
@@ -565,11 +664,28 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
   const angle = PITCH_ANGLES[investor.pitchAngle];
 
   return (
-    <div style={{ width: expanded ? '550px' : '420px', background: '#181922', border: '1px solid #2A2D3E', borderRadius: '14px', overflowY: 'auto', flexShrink: 0, transition: 'width 0.3s ease', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
-      <div style={{ padding: '20px', borderBottom: '1px solid #2A2D3E', display: 'flex', justifyContent: 'space-between', background: '#14151F', borderRadius: '14px 14px 0 0' }}>
+    <div style={{ 
+      width: expanded ? '550px' : '440px', 
+      background: 'linear-gradient(180deg, rgba(24,24,27,0.98) 0%, rgba(15,15,18,0.98) 100%)', 
+      border: '1px solid rgba(39,39,42,0.6)', 
+      borderRadius: '20px', 
+      overflowY: 'auto', 
+      flexShrink: 0, 
+      transition: 'all 0.3s ease', 
+      boxShadow: '0 16px 48px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.02) inset',
+      backdropFilter: 'blur(20px)',
+    }}>
+      <div style={{ 
+        padding: '24px', 
+        borderBottom: '1px solid rgba(39,39,42,0.6)', 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        background: 'linear-gradient(180deg, rgba(17,17,20,0.9) 0%, transparent 100%)', 
+        borderRadius: '20px 20px 0 0' 
+      }}>
         <div style={{ flex: 1 }}>
-          <div style={{ fontSize: '20px', fontWeight: '700', color: '#FFFFFF' }}>{investor.name}</div>
-          {investor.company && investor.company !== investor.name && <div style={{ fontSize: '14px', color: '#A0AEC0', marginTop: '4px' }}>{investor.company}</div>}
+          <div style={{ fontSize: '22px', fontWeight: '700', color: '#FAFAFA', letterSpacing: '-0.5px' }}>{investor.name}</div>
+          {investor.company && investor.company !== investor.name && <div style={{ fontSize: '14px', color: '#71717A', marginTop: '6px', fontWeight: '500' }}>{investor.company}</div>}
           {investor.email && !editing ? (
             <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               📧 {investor.email}
@@ -1190,6 +1306,13 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
 
         {/* TABLE VIEW */}
         {viewMode === 'table' && (
+        <div style={{ 
+          background: 'linear-gradient(165deg, rgba(24,24,27,0.8) 0%, rgba(17,17,20,0.9) 100%)',
+          borderRadius: '16px',
+          border: '1px solid rgba(39,39,42,0.5)',
+          overflow: 'hidden',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
+        }}>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -1301,8 +1424,9 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             })}
           </tbody>
         </table>
+        </div>
         )}
-        {viewMode === 'table' && filtered.length > 150 && <div style={{ padding: '12px', textAlign: 'center', color: '#64748B', fontSize: '11px' }}>Showing 150 of {filtered.length} — use filters to narrow</div>}
+        {viewMode === 'table' && filtered.length > 150 && <div style={{ padding: '16px', textAlign: 'center', color: '#71717A', fontSize: '12px', fontWeight: '500' }}>Showing 150 of {filtered.length} — use filters to narrow</div>}
       </div>
       {selected && <InvestorDetail investor={selected} setInvestors={setInvestors} onClose={() => setSelectedId(null)} />}
     </div>
@@ -1668,10 +1792,21 @@ export default function Home() {
 
   if (!loaded) {
     return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#0A0A0F' }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: '#09090B' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ fontSize: '24px', fontWeight: '800', color: '#F8FAFC' }}>BIRDAI</div>
-          <div style={{ fontSize: '12px', color: '#64748B' }}>Loading pipeline...</div>
+          <div style={{ 
+            fontSize: '32px', 
+            fontWeight: '800', 
+            background: 'linear-gradient(135deg, #10B981, #3B82F6)',
+            WebkitBackgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+            letterSpacing: '4px',
+            marginBottom: '12px'
+          }}>BIRDAI</div>
+          <div style={{ fontSize: '12px', color: '#71717A', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'center' }}>
+            <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', animation: 'pulse 1.5s infinite' }}></div>
+            Loading pipeline...
+          </div>
         </div>
       </div>
     );
@@ -1680,17 +1815,67 @@ export default function Home() {
   return (
     <div style={{ minHeight: '100vh' }}>
       {/* Header */}
-      <header style={{ background: 'linear-gradient(180deg, #181922 0%, #14151F 100%)', borderBottom: '1px solid #2A2D3E', padding: '20px 32px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+      <header style={{ 
+        background: 'linear-gradient(180deg, rgba(15,15,18,0.98) 0%, rgba(9,9,11,0.98) 100%)', 
+        borderBottom: '1px solid rgba(39,39,42,0.6)', 
+        padding: '18px 32px', 
+        display: 'flex', 
+        alignItems: 'center', 
+        justifyContent: 'space-between',
+        backdropFilter: 'blur(20px)',
+        position: 'sticky',
+        top: 0,
+        zIndex: 100,
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-          <div style={{ width: '44px', height: '44px', background: 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)', borderRadius: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: '800', fontSize: '20px', color: '#000', boxShadow: '0 4px 14px rgba(34,197,94,0.3)' }}>B</div>
+          <div style={{ 
+            width: '48px', 
+            height: '48px', 
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', 
+            borderRadius: '14px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            justifyContent: 'center', 
+            fontWeight: '800', 
+            fontSize: '22px', 
+            color: '#fff', 
+            boxShadow: '0 8px 24px rgba(16,185,129,0.4), 0 0 0 1px rgba(255,255,255,0.1) inset',
+            letterSpacing: '-1px'
+          }}>B</div>
           <div>
-            <div style={{ fontSize: '22px', fontWeight: '800', letterSpacing: '3px', color: '#FFFFFF' }}>BIRDAI</div>
-            <div style={{ fontSize: '12px', color: '#9BA3B5', letterSpacing: '1px', fontWeight: '500' }}>FUNDRAISING COMMAND CENTER</div>
+            <div style={{ 
+              fontSize: '20px', 
+              fontWeight: '800', 
+              letterSpacing: '3px', 
+              background: 'linear-gradient(135deg, #FAFAFA 0%, #A1A1AA 100%)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>BIRDAI</div>
+            <div style={{ fontSize: '11px', color: '#71717A', letterSpacing: '2px', fontWeight: '600', textTransform: 'uppercase' }}>Fundraising Command Center</div>
           </div>
         </div>
-        <nav style={{ display: 'flex', gap: '4px', background: '#0C0C12', borderRadius: '12px', padding: '5px', border: '1px solid #2A2D3E' }}>
+        <nav style={{ display: 'flex', gap: '4px', background: 'rgba(17,17,20,0.8)', borderRadius: '14px', padding: '5px', border: '1px solid rgba(39,39,42,0.6)' }}>
           {[{ k: 'dashboard', l: '📊 Dashboard' }, { k: 'pipeline', l: '🎯 Pipeline' }, { k: 'outreach', l: '📧 Outreach' }, { k: 'playbook', l: '📖 Playbook' }].map(t => (
-            <button key={t.k} onClick={() => setView(t.k)} style={{ padding: '12px 24px', borderRadius: '10px', border: 'none', cursor: 'pointer', fontSize: '14px', fontWeight: '600', fontFamily: 'inherit', background: view === t.k ? 'linear-gradient(135deg, #22C55E 0%, #16A34A 100%)' : 'transparent', color: view === t.k ? '#000' : '#9BA3B5', transition: 'all 0.2s' }}>{t.l}</button>
+            <button 
+              key={t.k} 
+              onClick={() => setView(t.k)} 
+              style={{ 
+                padding: '12px 24px', 
+                borderRadius: '10px', 
+                border: 'none', 
+                cursor: 'pointer', 
+                fontSize: '13px', 
+                fontWeight: '600', 
+                fontFamily: 'inherit', 
+                letterSpacing: '0.3px',
+                background: view === t.k 
+                  ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' 
+                  : 'transparent', 
+                color: view === t.k ? '#fff' : '#71717A', 
+                transition: 'all 0.2s ease',
+                boxShadow: view === t.k ? '0 4px 16px rgba(16,185,129,0.3)' : 'none',
+              }}
+            >{t.l}</button>
           ))}
         </nav>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
@@ -1818,7 +2003,12 @@ export default function Home() {
         </div>
       </header>
 
-      <main style={{ padding: '24px', overflowY: 'auto', height: 'calc(100vh - 65px)' }}>
+      <main style={{ 
+        padding: '32px', 
+        overflowY: 'auto', 
+        height: 'calc(100vh - 85px)', 
+        background: 'linear-gradient(180deg, #0F0F12 0%, #09090B 100%)',
+      }}>
         {view === 'dashboard' && <Dashboard investors={investors} setView={setView} setSelectedId={setSelectedId} setFilters={setFilters} />}
         {view === 'pipeline' && <PipelineView investors={investors} setInvestors={setInvestors} selectedId={selectedId} setSelectedId={setSelectedId} filters={filters} setFilters={setFilters} />}
         {view === 'outreach' && <OutreachView investors={investors} setView={setView} setSelectedId={setSelectedId} />}
