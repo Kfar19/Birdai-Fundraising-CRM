@@ -1045,6 +1045,23 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
           >
             {bulkMode ? '✓ Bulk Mode ON' : '☐ Bulk Edit'}
           </button>
+          
+          {/* Quick Reset Button */}
+          <button 
+            onClick={() => {
+              const activeCount = investors.filter(i => !['committed', 'passed', 'identified'].includes(i.stage)).length;
+              if (activeCount > 0 && confirm(`Reset ${activeCount} "active" investors back to "Identified"? (Keeps Committed and Passed as-is)`)) {
+                setInvestors(prev => prev.map(i => 
+                  !['committed', 'passed', 'identified'].includes(i.stage)
+                    ? { ...i, stage: 'identified' }
+                    : i
+                ));
+              }
+            }}
+            style={{ ...S.btn(), fontSize: '11px', padding: '8px 14px', background: '#F5980B20', color: '#F59E0B', border: '1px solid #F59E0B40' }}
+          >
+            ⚡ Reset Active → Identified
+          </button>
         </div>
         
         {/* Bulk Action Bar */}
@@ -1208,7 +1225,36 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
                     {i.company && i.company !== i.name && <div style={{ fontSize: '10px', color: '#64748B' }}>{i.company}</div>}
                   </td>
                   <td style={S.td}><span style={S.badge(tc.color)}>{tc.icon} {tc.label}</span></td>
-                  <td style={S.td}><span style={S.badge(sc.color)}>{sc.label}</span></td>
+                  <td style={S.td}>
+                    <select 
+                      value={i.stage}
+                      onClick={(e) => e.stopPropagation()}
+                      onChange={(e) => {
+                        const newStage = e.target.value;
+                        const autoHighPriority = ['committed', 'term-sheet', 'in-diligence'].includes(newStage);
+                        setInvestors(prev => prev.map(inv => 
+                          inv.id === i.id 
+                            ? { ...inv, stage: newStage, priority: autoHighPriority ? 'high' : inv.priority }
+                            : inv
+                        ));
+                      }}
+                      style={{ 
+                        padding: '6px 10px', 
+                        borderRadius: '8px', 
+                        border: `1px solid ${sc.color}40`,
+                        background: sc.color + '20', 
+                        color: sc.color, 
+                        fontSize: '12px', 
+                        fontWeight: '600',
+                        cursor: 'pointer',
+                        outline: 'none'
+                      }}
+                    >
+                      {Object.entries(PIPELINE_STAGES).map(([key, stage]) => (
+                        <option key={key} value={key} style={{ background: '#0C0C12', color: '#E8EAF0' }}>{stage.label}</option>
+                      ))}
+                    </select>
+                  </td>
                   <td style={S.td}><span style={{ color: i.priority === 'high' ? '#EF4444' : i.priority === 'medium' ? '#F59E0B' : '#64748B', fontWeight: '700', fontSize: '11px' }}>{i.priority === 'high' ? '●' : '○'} {(i.priority || '').toUpperCase()}</span></td>
                   <td style={S.td}><span style={{ fontSize: '10px', color: '#94A3B8' }}>{PITCH_ANGLES[i.pitchAngle]?.label || '—'}</span></td>
                   <td style={S.td}>
