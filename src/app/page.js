@@ -491,6 +491,12 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
         <div style={{ display: 'flex', gap: '8px' }}>
           <button 
             onClick={async () => {
+              // Extra protection for committed investors
+              if (investor.stage === 'committed') {
+                if (!confirm(`⚠️ ${investor.name} is COMMITTED! Are you absolutely sure you want to delete them? This will remove their commitment.`)) {
+                  return;
+                }
+              }
               if (confirm(`Delete ${investor.name}? This cannot be undone.`)) {
                 // Delete from local state
                 setInvestors(prev => prev.filter(i => i.id !== investor.id));
@@ -499,9 +505,9 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
                 onClose();
               }
             }} 
-            style={{ ...S.btn(), padding: '6px 10px', fontSize: '12px', background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440' }}
+            style={{ ...S.btn(), padding: '6px 10px', fontSize: '12px', background: investor.stage === 'committed' ? '#22C55E20' : '#EF444420', color: investor.stage === 'committed' ? '#22C55E' : '#EF4444', border: `1px solid ${investor.stage === 'committed' ? '#22C55E40' : '#EF444440'}` }}
           >
-            🗑️ Delete
+            {investor.stage === 'committed' ? '✅ Committed' : '🗑️ Delete'}
           </button>
           <button 
             onClick={() => setExpanded(e => !e)} 
