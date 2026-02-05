@@ -344,6 +344,7 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
   const [researchResult, setResearchResult] = useState(null);
   const [aiResearch, setAiResearch] = useState(null);
   const [aiLoading, setAiLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
 
   // Auto-fetch AI research when investor changes
   useEffect(() => { 
@@ -437,10 +438,10 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
   const angle = PITCH_ANGLES[investor.pitchAngle];
 
   return (
-    <div style={{ width: '380px', background: '#111318', border: '1px solid #1E293B', borderRadius: '10px', overflowY: 'auto', flexShrink: 0 }}>
-      <div style={{ padding: '20px', borderBottom: '1px solid #2D3748', display: 'flex', justifyContent: 'space-between' }}>
-        <div>
-          <div style={{ fontSize: '18px', fontWeight: '700', color: '#FFFFFF' }}>{investor.name}</div>
+    <div style={{ width: expanded ? '550px' : '420px', background: '#181922', border: '1px solid #2A2D3E', borderRadius: '14px', overflowY: 'auto', flexShrink: 0, transition: 'width 0.3s ease', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+      <div style={{ padding: '20px', borderBottom: '1px solid #2A2D3E', display: 'flex', justifyContent: 'space-between', background: '#14151F', borderRadius: '14px 14px 0 0' }}>
+        <div style={{ flex: 1 }}>
+          <div style={{ fontSize: '20px', fontWeight: '700', color: '#FFFFFF' }}>{investor.name}</div>
           {investor.company && investor.company !== investor.name && <div style={{ fontSize: '14px', color: '#A0AEC0', marginTop: '4px' }}>{investor.company}</div>}
           {investor.email && !editing ? (
             <div style={{ fontSize: '14px', color: '#3B82F6', marginTop: '6px', display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -501,6 +502,13 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
             style={{ ...S.btn(), padding: '6px 10px', fontSize: '12px', background: '#EF444420', color: '#EF4444', border: '1px solid #EF444440' }}
           >
             🗑️ Delete
+          </button>
+          <button 
+            onClick={() => setExpanded(e => !e)} 
+            style={{ ...S.btn(), padding: '6px 10px', fontSize: '14px', background: expanded ? '#60A5FA20' : 'transparent', border: '1px solid #2A2D3E' }}
+            title={expanded ? 'Collapse panel' : 'Expand panel'}
+          >
+            {expanded ? '◀' : '▶'}
           </button>
           <button onClick={onClose} style={{ ...S.btn(), padding: '6px 10px', fontSize: '16px' }}>✕</button>
         </div>
