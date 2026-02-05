@@ -3,7 +3,7 @@
 // ═══════════════════════════════════════════════════════════════
 
 export const INVESTOR_TYPES = {
-  "angel": { label: "Angel / Committed", color: "#10B981", icon: "👼" },
+  "angel": { label: "Angel", color: "#10B981", icon: "👼" },
   "crypto-vc": { label: "Crypto/Web3 VC", color: "#8B5CF6", icon: "⛓" },
   "institutional": { label: "Institutional / SWF", color: "#3B82F6", icon: "🏛" },
   "fund-of-funds": { label: "Fund of Funds", color: "#F59E0B", icon: "📊" },
