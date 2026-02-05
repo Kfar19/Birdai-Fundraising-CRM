@@ -455,18 +455,53 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
 
         {/* Editable Fields */}
         <div style={{ display: 'grid', gap: '10px', marginBottom: '16px' }}>
-          {[
-            { key: 'stage', label: 'STAGE', el: 'select', opts: PIPELINE_STAGES },
-            { key: 'priority', label: 'PRIORITY', el: 'select', opts: { high: { label: '🔴 High' }, medium: { label: '🟡 Medium' }, low: { label: '⚪ Low' } } },
-            { key: 'pitchAngle', label: 'PITCH ANGLE', el: 'select', opts: PITCH_ANGLES },
-          ].map(f => (
-            <div key={f.key}>
-              <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>{f.label}</label>
-              <select style={{ ...S.select, width: '100%', marginTop: '4px' }} value={form[f.key]} onChange={e => { setForm(p => ({ ...p, [f.key]: e.target.value })); setEditing(true); }}>
-                {Object.entries(f.opts).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+          {/* Stage - auto sets priority to high when committed */}
+          <div>
+            <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>STAGE</label>
+            <select 
+              style={{ ...S.select, width: '100%', marginTop: '4px' }} 
+              value={form.stage} 
+              onChange={e => { 
+                const newStage = e.target.value;
+                // Auto-set priority to high for committed, term-sheet, or in-diligence
+                const autoHighPriority = ['committed', 'term-sheet', 'in-diligence'].includes(newStage);
+                setForm(p => ({ 
+                  ...p, 
+                  stage: newStage,
+                  priority: autoHighPriority ? 'high' : p.priority 
+                })); 
+                setEditing(true); 
+              }}
+            >
+              {Object.entries(PIPELINE_STAGES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </div>
+          
+          {/* Priority */}
+          <div>
+            <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>PRIORITY</label>
+            <select 
+              style={{ ...S.select, width: '100%', marginTop: '4px' }} 
+              value={form.priority} 
+              onChange={e => { setForm(p => ({ ...p, priority: e.target.value })); setEditing(true); }}
+            >
+              {Object.entries({ high: { label: '🔴 High' }, medium: { label: '🟡 Medium' }, low: { label: '⚪ Low' } }).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+            </select>
+          </div>
+          
+          {/* Pitch Angle - only show if not committed or passed */}
+          {!['committed', 'passed'].includes(form.stage) && (
+            <div>
+              <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>PITCH ANGLE</label>
+              <select 
+                style={{ ...S.select, width: '100%', marginTop: '4px' }} 
+                value={form.pitchAngle} 
+                onChange={e => { setForm(p => ({ ...p, pitchAngle: e.target.value })); setEditing(true); }}
+              >
+                {Object.entries(PITCH_ANGLES).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
               </select>
             </div>
-          ))}
+          )}
           <div>
             <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>NEXT ACTION</label>
             <input style={{ ...S.input, marginTop: '4px' }} value={form.nextAction || ''} onChange={e => { setForm(p => ({ ...p, nextAction: e.target.value })); setEditing(true); }} />
@@ -483,8 +518,8 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
 
         {editing && <button style={{ ...S.btn('primary'), width: '100%', marginBottom: '16px' }} onClick={save}>Save Changes</button>}
 
-        {/* Pitch Recommendation */}
-        {angle && (
+        {/* Pitch Recommendation - only show if not committed or passed */}
+        {angle && !['committed', 'passed'].includes(form.stage) && (
           <div style={{ background: '#0A0A0F', borderRadius: '8px', padding: '12px', marginBottom: '16px', border: '1px solid #1E293B' }}>
             <div style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700', marginBottom: '6px' }}>RECOMMENDED PITCH</div>
             <div style={{ fontSize: '13px', fontWeight: '700', color: '#F8FAFC', marginBottom: '4px' }}>{angle.label}</div>
@@ -493,6 +528,14 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
               <div key={idx} style={{ fontSize: '11px', color: '#CBD5E1', padding: '2px 0' }}>→ {tp}</div>
             ))}
             <div style={{ fontSize: '9px', color: '#64748B', marginTop: '8px' }}>Key slides: {angle.keySlides.join(', ')}</div>
+          </div>
+        )}
+        
+        {/* Show commitment amount prominently for committed investors */}
+        {form.stage === 'committed' && (
+          <div style={{ background: '#10B98120', borderRadius: '8px', padding: '16px', marginBottom: '16px', border: '1px solid #10B981', textAlign: 'center' }}>
+            <div style={{ fontSize: '9px', color: '#10B981', letterSpacing: '1px', fontWeight: '700', marginBottom: '8px' }}>✅ COMMITTED</div>
+            <div style={{ fontSize: '28px', fontWeight: '800', color: '#10B981' }}>${(form.commitment || 0).toLocaleString()}</div>
           </div>
         )}
 
