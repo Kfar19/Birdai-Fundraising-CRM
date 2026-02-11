@@ -399,6 +399,53 @@ function Dashboard({ investors, setView, setSelectedId, setFilters }) {
             );
           })}
         </div>
+
+        {/* Geography Breakdown */}
+        <div style={{ marginTop: '24px' }}>
+          <div style={{ ...S.cardTitle, marginBottom: '16px' }}>
+            <span style={{ fontSize: '16px' }}>🌍</span>
+            By Region
+          </div>
+          {Object.entries(REGIONS).map(([key, region]) => {
+            const count = investors.filter(i => getRegion(i.location) === key).length;
+            if (count === 0) return null;
+            const colors = { 'north-america': '#3B82F6', 'europe': '#8B5CF6', 'asia': '#10B981', 'middle-east': '#F59E0B', 'other': '#71717A' };
+            return (
+              <div 
+                key={key} 
+                onClick={() => { setFilters(prev => ({ ...prev, region: key, stage: 'all', search: '', activeOnly: false })); setView('pipeline'); }}
+                style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  alignItems: 'center', 
+                  padding: '12px 14px', 
+                  marginBottom: '8px',
+                  cursor: 'pointer', 
+                  borderRadius: '12px', 
+                  transition: 'all 0.2s ease',
+                  background: 'rgba(17,17,20,0.5)',
+                  border: '1px solid rgba(39,39,42,0.3)',
+                }}
+                onMouseEnter={e => {
+                  e.currentTarget.style.background = `${colors[key]}15`;
+                  e.currentTarget.style.borderColor = `${colors[key]}40`;
+                  e.currentTarget.style.transform = 'translateX(4px)';
+                }}
+                onMouseLeave={e => {
+                  e.currentTarget.style.background = 'rgba(17,17,20,0.5)';
+                  e.currentTarget.style.borderColor = 'rgba(39,39,42,0.3)';
+                  e.currentTarget.style.transform = 'translateX(0)';
+                }}
+              >
+                <span style={{ fontSize: '14px', color: '#E4E4E7', fontWeight: '500' }}>{region.icon} {region.label}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{ width: `${Math.min(100, (count / investors.length) * 200)}px`, height: '6px', background: colors[key], borderRadius: '3px' }} />
+                  <span style={{ fontSize: '14px', fontWeight: '700', color: colors[key], minWidth: '32px', textAlign: 'right' }}>{count}</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
 
       {/* Yesterday's Activity Summary */}
@@ -1013,6 +1060,52 @@ function InvestorDetail({ investor, setInvestors, onClose }) {
 }
 
 // ═══════════════════════════════════════════════════════════════
+// GEOGRAPHY HELPER
+// ═══════════════════════════════════════════════════════════════
+
+const REGIONS = {
+  'north-america': { label: 'North America', icon: '🇺🇸' },
+  'europe': { label: 'Europe', icon: '🇪🇺' },
+  'asia': { label: 'Asia Pacific', icon: '🌏' },
+  'middle-east': { label: 'Middle East', icon: '🇦🇪' },
+  'other': { label: 'Other / Unknown', icon: '🌍' },
+};
+
+function getRegion(location) {
+  if (!location) return 'other';
+  const loc = location.toLowerCase();
+  
+  // North America
+  if (loc.includes('usa') || loc.includes('us') || loc.includes('new york') || loc.includes('san francisco') || 
+      loc.includes('boston') || loc.includes('chicago') || loc.includes('los angeles') || loc.includes('miami') ||
+      loc.includes('austin') || loc.includes('seattle') || loc.includes('denver') || loc.includes('atlanta') ||
+      loc.includes('washington') || loc.includes('palo alto') || loc.includes('menlo park') || 
+      loc.match(/,\s*(ca|ny|tx|ma|il|fl|wa|co|ga|nc|ct|nj|pa|dc|nh|md)$/i) ||
+      loc.includes('canada') || loc.includes('toronto') || loc.includes('vancouver')) return 'north-america';
+  
+  // Europe
+  if (loc.includes('london') || loc.includes('uk') || loc.includes('united kingdom') || loc.includes('germany') ||
+      loc.includes('berlin') || loc.includes('paris') || loc.includes('france') || loc.includes('netherlands') ||
+      loc.includes('amsterdam') || loc.includes('zurich') || loc.includes('switzerland') || loc.includes('spain') ||
+      loc.includes('italy') || loc.includes('stockholm') || loc.includes('sweden') || loc.includes('ireland') ||
+      loc.includes('dublin') || loc.includes('luxembourg') || loc.includes('portugal') || loc.includes('belgium')) return 'europe';
+  
+  // Asia Pacific
+  if (loc.includes('singapore') || loc.includes('hong kong') || loc.includes('china') || loc.includes('beijing') ||
+      loc.includes('shanghai') || loc.includes('japan') || loc.includes('tokyo') || loc.includes('korea') ||
+      loc.includes('seoul') || loc.includes('india') || loc.includes('mumbai') || loc.includes('bangalore') ||
+      loc.includes('thailand') || loc.includes('bangkok') || loc.includes('vietnam') || loc.includes('indonesia') ||
+      loc.includes('australia') || loc.includes('sydney') || loc.includes('asia') || loc.includes('taiwan')) return 'asia';
+  
+  // Middle East
+  if (loc.includes('dubai') || loc.includes('uae') || loc.includes('abu dhabi') || loc.includes('saudi') ||
+      loc.includes('israel') || loc.includes('tel aviv') || loc.includes('qatar') || loc.includes('bahrain') ||
+      loc.includes('kuwait') || loc.includes('oman')) return 'middle-east';
+  
+  return 'other';
+}
+
+// ═══════════════════════════════════════════════════════════════
 // PIPELINE VIEW
 // ═══════════════════════════════════════════════════════════════
 
@@ -1061,6 +1154,7 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
     if (filters.priority !== 'all') r = r.filter(i => i.priority === filters.priority);
     if (filters.activeOnly) r = r.filter(i => !['committed', 'passed', 'identified'].includes(i.stage));
     if (filters.source !== 'all') r = r.filter(i => i.source === filters.source);
+    if (filters.region !== 'all') r = r.filter(i => getRegion(i.location) === filters.region);
     r.sort((a, b) => {
       if (filters.sort === 'engagement') return calculateEngagementScore(b) - calculateEngagementScore(a);
       if (filters.sort === 'commitment') return (b.commitment || 0) - (a.commitment || 0);
@@ -1145,6 +1239,12 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
             <option value="inception-funds">Inception Funds</option>
             <option value="web3-vc-list">Web3 VCs</option>
             <option value="manual">Manual</option>
+          </select>
+          <select style={S.select} value={filters.region} onChange={e => setFilters(f => ({ ...f, region: e.target.value }))}>
+            <option value="all">🌍 All Regions</option>
+            {Object.entries(REGIONS).map(([key, r]) => (
+              <option key={key} value={key}>{r.icon} {r.label}</option>
+            ))}
           </select>
           {viewMode === 'table' && (
             <select style={S.select} value={filters.sort} onChange={e => setFilters(f => ({ ...f, sort: e.target.value }))}>
@@ -1319,6 +1419,7 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
               {bulkMode && <th style={{ ...S.th, width: '40px', textAlign: 'center' }}>☐</th>}
               <th style={S.th}>Name / Company</th>
               <th style={S.th}>Type</th>
+              <th style={S.th}>Region</th>
               <th style={S.th}>Stage</th>
               <th style={S.th}>Priority</th>
               <th style={S.th}>Pitch</th>
@@ -1363,6 +1464,14 @@ function PipelineView({ investors, setInvestors, selectedId, setSelectedId, filt
                     {i.company && i.company !== i.name && <div style={{ fontSize: '10px', color: '#64748B' }}>{i.company}</div>}
                   </td>
                   <td style={S.td}><span style={S.badge(tc.color)}>{tc.icon} {tc.label}</span></td>
+                  <td style={S.td}>
+                    {(() => {
+                      const region = getRegion(i.location);
+                      const r = REGIONS[region];
+                      const colors = { 'north-america': '#3B82F6', 'europe': '#8B5CF6', 'asia': '#10B981', 'middle-east': '#F59E0B', 'other': '#71717A' };
+                      return <span style={{ fontSize: '12px', color: colors[region] }}>{r.icon} {i.location ? (i.location.length > 20 ? i.location.slice(0, 18) + '...' : i.location) : r.label}</span>;
+                    })()}
+                  </td>
                   <td style={S.td}>
                     <select 
                       value={
@@ -1579,7 +1688,7 @@ export default function Home() {
   const [investors, setInvestors] = useState([]);
   const [view, setView] = useState('dashboard');
   const [selectedId, setSelectedId] = useState(null);
-  const [filters, setFilters] = useState({ search: '', type: 'all', stage: 'all', source: 'all', priority: 'all', sort: 'name', activeOnly: false });
+  const [filters, setFilters] = useState({ search: '', type: 'all', stage: 'all', source: 'all', priority: 'all', sort: 'name', activeOnly: false, region: 'all' });
   const [showAdd, setShowAdd] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [syncing, setSyncing] = useState(false);
