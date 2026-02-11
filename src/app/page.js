@@ -1641,7 +1641,7 @@ function PlaybookView({ investors }) {
 // ═══════════════════════════════════════════════════════════════
 
 function AddInvestorForm({ onAdd, onClose }) {
-  const [form, setForm] = useState({ name: '', company: '', email: '', type: 'other', priority: 'medium', stage: 'identified', notes: '', pitchAngle: 'neutral-auction' });
+  const [form, setForm] = useState({ name: '', company: '', email: '', location: '', type: 'other', priority: 'medium', stage: 'identified', notes: '', pitchAngle: 'neutral-auction' });
   return (
     <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000 }}>
       <div style={{ ...S.card, width: '480px', maxHeight: '80vh', overflowY: 'auto' }}>
@@ -1650,7 +1650,7 @@ function AddInvestorForm({ onAdd, onClose }) {
           <button onClick={onClose} style={{ ...S.btn(), padding: '4px 8px' }}>✕</button>
         </div>
         <div style={{ display: 'grid', gap: '10px' }}>
-          {['name', 'company', 'email'].map(k => (
+          {['name', 'company', 'email', 'location'].map(k => (
             <div key={k}>
               <label style={{ fontSize: '9px', color: '#64748B', letterSpacing: '1px', fontWeight: '700' }}>{k.toUpperCase()}</label>
               <input style={{ ...S.input, marginTop: '4px' }} value={form[k]} onChange={e => setForm(p => ({ ...p, [k]: e.target.value }))} />
@@ -1869,26 +1869,30 @@ export default function Home() {
     };
   }, []);
 
-  // Save on change - to localStorage immediately, debounced to cloud
+  // Save on change - to localStorage IMMEDIATELY, debounced to cloud
   useEffect(() => {
     if (loaded && investors.length > 0) {
-      // Save to localStorage immediately
-      const t = setTimeout(() => saveInvestors(investors), 500);
+      // Save to localStorage IMMEDIATELY (no delay)
+      saveInvestors(investors);
+      console.log('💾 Saved to localStorage:', investors.length, 'investors');
       
-      // Debounced save to cloud
+      // Debounced save to cloud (1 second delay)
+      setCloudStatus('syncing');
       const cloudT = setTimeout(async () => {
         if (supabase) {
           try {
+            console.log('☁️ Syncing to cloud...');
             await bulkUpsertInvestors(investors);
             setCloudStatus('synced');
+            console.log('✅ Cloud sync complete');
           } catch (err) {
             console.error('Auto cloud sync error:', err);
+            setCloudStatus('error');
           }
         }
-      }, 2000); // Wait 2 seconds of inactivity before syncing to cloud
+      }, 1000); // Wait 1 second before syncing to cloud
       
       return () => {
-        clearTimeout(t);
         clearTimeout(cloudT);
       };
     }
@@ -1896,7 +1900,24 @@ export default function Home() {
 
   const addInvestor = (form) => {
     const maxId = investors.reduce((max, i) => Math.max(max, i.id), 0);
-    setInvestors(prev => [...prev, { ...form, id: maxId + 1, commitment: 0, website: '', twitter: '', location: '', focus: '', aum: '', source: 'manual', lastContact: null, nextAction: '', activities: [] }]);
+    const newInvestor = { 
+      ...form, 
+      id: maxId + 1, 
+      commitment: 0, 
+      website: '', 
+      twitter: '', 
+      location: form.location || '', 
+      focus: '', 
+      aum: '', 
+      source: 'manual', 
+      lastContact: null, 
+      nextAction: '', 
+      activities: [] 
+    };
+    console.log('➕ Adding investor:', newInvestor.name, 'ID:', newInvestor.id);
+    setInvestors(prev => [...prev, newInvestor]);
+    // Show confirmation
+    alert(`✅ "${newInvestor.name}" added to pipeline!`);
   };
 
   if (!loaded) {
