@@ -364,7 +364,59 @@ const INCEPTION_FUNDS = [
   "Sands Capital Ventures","Santa Barbara Venture Partners","Sapient Capital","Scale Venture Partners Scout","Scrum Ventures",
 ];
 
-// ── 6. US WEB3/DeFi VC FUNDS (top 80 most relevant) ──────────
+// ── 6. QUANT LENDING / MEV INFRASTRUCTURE INVESTORS ──────────
+// These are the MOST RELEVANT investors for the "quant lending platform on-chain" thesis.
+// Funds that invested in comparable protocols (CoW, DFlow, Jito, Maple, Morpho, Flashbots)
+// and strategic operator-investors who would both use and fund BirdAI.
+
+const QUANT_LENDING_INVESTORS = [
+  // ── CoW Protocol investors (batch auction model BirdAI adapts) ──
+  { name: "Anna George", company: "CoW Protocol / Gnosis", type: "Crypto VC / Protocol", email: "anna@cow.fi", website: "https://cow.fi", twitter: "@CoWSwap", desc: "CEO & Co-Founder, CoW Protocol. Built the batch auction model BirdAI adapts to Sui. Strategic alignment — they want batch auctions to spread.", priority: "high", relevance: "CoW Protocol parent — strongest thesis validator", contact: "Email anna@cow.fi or DM @CoWSwap" },
+  { name: "Will Warren", company: "0x Labs / 0x Ventures", type: "Crypto VC", email: "will@0x.org", website: "https://0x.org", twitter: "@willwarren89", desc: "Co-Founder & CEO, 0x. DEX aggregation infrastructure. Invested in CoW Protocol. Deep understanding of order flow and execution quality.", priority: "high", relevance: "CoW investor, order flow expertise", contact: "DM @willwarren89 on Twitter" },
+
+  // ── DFlow investors (white-label order flow model BirdAI mirrors) ──
+  { name: "Evgeny Gaevoy", company: "Wintermute", type: "Market Maker / VC", email: "partnerships@wintermute.com", website: "https://wintermute.com", twitter: "@EvgenyGaevoy", desc: "Founder & CEO, Wintermute. DFlow investor AND largest crypto market maker. Spent $80M on order flow in 2025. Both investor AND operator/user of BirdAI.", priority: "high", relevance: "DFlow investor + potential BirdAI operator", contact: "Email partnerships@wintermute.com or DM @EvgenyGaevoy" },
+  { name: "Amber Group BD", company: "Amber Group", type: "Market Maker / VC", email: "", website: "https://ambergroup.io", twitter: "@ambergroup_io", desc: "Major crypto market maker with venture arm. Active on Sui. Potential operator AND investor.", priority: "high", relevance: "Market maker — potential BirdAI borrower + investor", contact: "Contact form at ambergroup.io or DM @ambergroup_io" },
+  { name: "Quynh Ho", company: "GSR", type: "Market Maker / VC", email: "", website: "https://gsr.io", twitter: "@GSR_io", desc: "Head of Venture Investment & Corp Dev, GSR. Institutional crypto market maker. Provides liquidity on Sui DEXs. Potential operator AND investor.", priority: "high", relevance: "Market maker — potential BirdAI borrower + investor", contact: "LinkedIn message to Quynh Ho or contact form gsr.io" },
+
+  // ── Jito investors (MEV redistribution model) ──
+  { name: "Kyle Samani", company: "Multicoin Capital", type: "Crypto VC", email: "kyle@multicoin.capital", website: "https://multicoin.capital", twitter: "@KyleSamani", desc: "Co-Founder & Managing Partner. Led Jito's round. Thesis: MEV capture and redistribution is multi-billion dollar opportunity. BirdAI is operator-layer Jito.", priority: "high", relevance: "Jito lead investor — understands MEV capital layer", contact: "DM @KyleSamani on Twitter or email kyle@multicoin.capital" },
+
+  // ── DeFi lending protocol investors ──
+  { name: "Paul Frambot", company: "Morpho Labs", type: "DeFi Protocol", email: "paul@morpho.org", website: "https://morpho.org", twitter: "@PaulFrambot", desc: "Co-Founder & CEO, Morpho. Built leading DeFi lending optimizer ($10B+ deposits). a16z + Variant backed. Understands DeFi credit markets deeply.", priority: "medium", relevance: "DeFi lending expertise", contact: "DM @PaulFrambot on Twitter" },
+  { name: "Jakob Kronbichler", company: "Clearpool Finance", type: "DeFi Protocol", email: "jakob@clearpool.finance", website: "https://clearpool.finance", twitter: "@ClearpoolFin", desc: "Co-Founder & CEO. Undercollateralized DeFi lending for institutions. Live on multiple chains. Closest operational comparable to BirdAI's lending model.", priority: "high", relevance: "Direct comparable — undercollateralized DeFi lending", contact: "Email jakob@clearpool.finance" },
+  { name: "Darshan Vaidya", company: "Credora", type: "DeFi Credit", email: "darshan@credora.io", website: "https://credora.io", twitter: "@CredoraNetwork", desc: "Co-Founder & CEO. Privacy-preserving credit scoring for DeFi. Used by Maple for borrower assessment. Directly relevant to BirdAI's underwriting engine.", priority: "high", relevance: "DeFi credit scoring — direct relevance to underwriting", contact: "Email darshan@credora.io" },
+
+  // ── Flashbots / MEV research ecosystem ──
+  { name: "Hasu", company: "Flashbots", type: "MEV Research / Angel", email: "", website: "https://uncommoncore.co", twitter: "@hasufl", desc: "Strategy Lead, Flashbots. Most influential MEV researcher. Angel investments in MEV infrastructure. Endorsement is gold.", priority: "high", relevance: "MEV thought leader — validation", contact: "DM @hasufl on Twitter (249K followers, very responsive)" },
+  { name: "Stephane Gosselin", company: "Frontier Research", type: "MEV Research", email: "stephane@frontier.tech", website: "https://frontier.tech", twitter: "@thegostep", desc: "Founder, Frontier Research. Ex-Flashbots co-founder. Publishes on auction design, order flow, execution quality. MEV research authority.", priority: "high", relevance: "MEV research credibility — Flashbots co-founder", contact: "DM @thegostep on Twitter" },
+
+  // ── Sui-specific funds ──
+  { name: "Mysten Labs BD", company: "Mysten Labs", type: "L1 Ecosystem", email: "info@mystenlabs.com", website: "https://mystenlabs.com", twitter: "@Mysten_Labs", desc: "Sui's core team. Most aligned investor possible. Strongest ecosystem support signal. Approach through Foundation relationship.", priority: "high", relevance: "Sui builders — strongest ecosystem signal", contact: "Email info@mystenlabs.com or through Sui Discord" },
+  { name: "Sui Foundation", company: "Sui Foundation", type: "L1 Ecosystem", email: "", website: "https://sui.io", twitter: "@SuiNetwork", desc: "Sui's grant and investment arm. Moonshots program. First customer potential (ecosystem intelligence data).", priority: "high", relevance: "First customer + investor", contact: "Through Moonshots application and Sui Discord" },
+  { name: "Ivan Li", company: "Comma3 Ventures", type: "Crypto VC", email: "ivan@comma3.co", website: "https://comma3.co", twitter: "@comma3ventures", desc: "Founding Partner. Sui ecosystem focused fund. Active investor in Sui DeFi protocols. Based between Taipei, Singapore, SF.", priority: "high", relevance: "Sui ecosystem specialist", contact: "Email ivan@comma3.co or DM @comma3ventures" },
+
+  // ── Quant / data-driven crypto funds ──
+  { name: "Dan Abelon", company: "Two Sigma Ventures", type: "Quant VC", email: "dan@twosigmaventures.com", website: "https://twosigmaventures.com", twitter: "", desc: "Partner, leads crypto/Web3 investments (~15% of firm capital in crypto). Two Sigma quant DNA — 'quant lending' thesis resonates directly.", priority: "high", relevance: "Quant DNA — perfect thesis fit", contact: "Email dan@twosigmaventures.com. Warm intro preferred — institutional firm." },
+  { name: "Boris Revsin", company: "Tribe Capital", type: "Quant VC", email: "boris@tribecap.co", website: "https://crypto.tribecap.co", twitter: "@brevsin", desc: "CEO, Tribe Capital. Leads crypto fund. Data-driven venture fund built on quantitative analysis. Data flywheel thesis maps to how they think.", priority: "high", relevance: "Data-driven — thesis fit", contact: "DM @brevsin on Twitter" },
+  { name: "Cumberland BD", company: "Cumberland / DRW", type: "Market Maker / VC", email: "rm@cumberland.io", website: "https://cumberland.io", twitter: "@CumberlandSays", desc: "DRW's crypto arm. One of largest prop trading firms. Would understand quant lending intuitively. Also check drw.com/vc for venture.", priority: "high", relevance: "Prop trading — understands operator capital needs", contact: "Email rm@cumberland.io" },
+
+  // ── Market maker operators (potential borrowers + investors) ──
+  { name: "Ezra Wong", company: "Auros Global", type: "Market Maker", email: "partnerships@auros.global", website: "https://auros.global", twitter: "@AurosGlobal", desc: "Director of BD & Partnerships. Crypto market maker active on Sui. Potential operator AND investor. Validates demand for operator capital.", priority: "high", relevance: "Sui market maker — demand validation + investor", contact: "Email partnerships@auros.global" },
+  { name: "Tina Wang", company: "Kronos Research", type: "Market Maker", email: "tina@kronosresearch.com", website: "https://kronosresearch.com", twitter: "@KronosResearch", desc: "CEO. Asia-based crypto market maker. Potential operator. Validates market maker borrower thesis. Based in Taipei.", priority: "medium", relevance: "Market maker — demand validation", contact: "Email tina@kronosresearch.com" },
+  { name: "Michael Lie", company: "Flow Traders", type: "TradFi Market Maker", email: "", website: "https://flowtraders.com", twitter: "@FlowTraders", desc: "Global Head of Digital Assets. Amsterdam-based market maker with crypto desk. TradFi pedigree, understands prime brokerage.", priority: "medium", relevance: "TradFi market maker — prime brokerage angle", contact: "flowtraders.com/digital-assets/contact or LinkedIn. Warm intro preferred." },
+
+  // ── DeFi risk / infrastructure ──
+  { name: "Tarun Chitra", company: "Gauntlet / Robot Ventures", type: "Angel / Founder", email: "tarun@gauntlet.network", website: "https://gauntlet.xyz", twitter: "@tarunchitra", desc: "CEO & Co-Founder, Gauntlet. Co-Founder, Robot Ventures (with Leshner). PhD applied math. DeFi mechanism design and risk. Academic credibility for quant thesis.", priority: "high", relevance: "DeFi risk academic — quant credibility", contact: "DM @tarunchitra on Twitter or email tarun@gauntlet.network" },
+  { name: "Omer Goldberg", company: "Chaos Labs", type: "DeFi Risk", email: "omer@chaoslabs.xyz", website: "https://chaoslabs.xyz", twitter: "@omeragoldberg", desc: "Founder & CEO. DeFi risk simulation and analytics. Works with major lending protocols. Potential technical partner for risk modeling.", priority: "medium", relevance: "Risk simulation — potential partner", contact: "DM @omeragoldberg on Twitter" },
+
+  // ── Strategic angels ──
+  { name: "Robert Leshner", company: "Robot Ventures / Compound", type: "Angel / VC", email: "", website: "https://robvc.com", twitter: "@rleshner", desc: "GP, Robot Ventures ($75M fund). CEO, Superstate. Founder, Compound. Built first major DeFi lending protocol. Endorsement = instant DeFi lending credibility.", priority: "high", relevance: "Compound founder — DeFi lending godfather", contact: "DM @rleshner on Twitter — very active, responsive to strong DeFi infra pitches" },
+  { name: "Georgios Konstantopoulos", company: "Paradigm", type: "Angel / Builder", email: "georgios@paradigm.xyz", website: "https://gakonst.com", twitter: "@gakonst", desc: "CTO & GP, Paradigm. Deep MEV and DeFi infrastructure expertise. Built Flashbots tooling. Prefers concise technical pitches.", priority: "medium", relevance: "MEV infrastructure builder", contact: "Email georgios@paradigm.xyz or DM @gakonst" },
+  { name: "samczsun", company: "SEAL 911 (ex-Paradigm)", type: "Security Researcher", email: "", website: "https://samczsun.com/contact", twitter: "@samczsun", desc: "Head of Security, SEAL 911. Legendary DeFi security auditor. His review of smart contracts = ultimate security signal. Left Paradigm 2025.", priority: "medium", relevance: "Security credibility", contact: "Contact form samczsun.com/contact or DM @samczsun" },
+];
+
+// ── 7. US WEB3/DeFi VC FUNDS (top 80 most relevant) ──────────
 
 const WEB3_VCS = [
   { name: "1confirmation", website: "https://www.1confirmation.com/", twitter: "@1confirmation", desc: "Open networks empowering the masses" },
@@ -546,7 +598,23 @@ export function buildInitialInvestors() {
     });
   }
 
-  // 6. Web3 VCs
+  // 6. Quant Lending / MEV Infrastructure (highest relevance for current thesis)
+  for (const q of QUANT_LENDING_INVESTORS) {
+    const iType = classifyInvestorType({ type: q.type, name: q.company || q.name, notes: q.desc });
+    investors.push({
+      id: id++, name: q.name, company: q.company || q.name, email: q.email || "", type: iType,
+      location: "", focus: "Quant Lending / MEV / DeFi Infra", aum: "", website: q.website, twitter: q.twitter,
+      notes: `${q.desc} | RELEVANCE: ${q.relevance} | CONTACT: ${q.contact || ""}`,
+      commitment: 0, priority: q.priority,
+      stage: "identified",
+      pitchAngle: "jito-for-sui",
+      source: "quant-lending-thesis",
+      lastContact: null, nextAction: q.email ? "Draft personalized outreach — quant lending thesis" : "DM on Twitter — quant lending thesis",
+      activities: [],
+    });
+  }
+
+  // 7. Web3 VCs
   for (const w of WEB3_VCS) {
     investors.push({
       id: id++, name: w.name, company: w.name, email: "", type: "crypto-vc",
